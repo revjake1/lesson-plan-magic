@@ -1,0 +1,9 @@
+# Dev-only dependencies. Not required to run the plugin — only needed
+# when you're hacking on the scripts themselves.
+-r requirements.txt  # Reuse the runtime deps under test.
+
+pytest>=8.0.0  # Test runner.
+pytest-cov>=4.1.0  # Coverage reporting during local development.
+
+reportlab>=4.0.0  # Synthesize PDFs for parse_standards tests.
+responses>=0.24.0  # Mock HTTP for URL-fetch tests.

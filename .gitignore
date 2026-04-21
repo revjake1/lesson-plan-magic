@@ -1,6 +1,5 @@
-# Plugin build output (not ready to publish yet)
+# Build output
 dist/
-extracted/
 
 # Python
 .venv/
@@ -14,10 +13,6 @@ htmlcov/
 # macOS
 .DS_Store
 Thumbs.db
-
-# Node
-node_modules/
-package-lock.json
 
 # Source files (not ready to publish yet)
 Lesson_Plan_Magic_Overview.pptx
