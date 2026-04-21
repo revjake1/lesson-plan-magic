@@ -1,0 +1,137 @@
+# Example config.yaml for Jake's Lesson Plan Magic
+# This is a reference file. The real config is created during first-run onboarding
+# and lives at ~/Documents/Lesson Plan Magic/config.yaml
+#
+# This example shows TWO common scenarios:
+#   1. A high-school teacher with two preps (AP Chem + regular Chem)
+#   2. An elementary self-contained 3rd grade teacher
+#
+# To try a specific scenario, copy one of the two subjects blocks.
+
+version: "0.2.5"
+
+teacher:
+  name: "Jane Smith"
+  experience_level: veteran
+  district: "Anytown USD"
+  state: "OH"
+  school: "Central High School"
+
+subjects:
+  # ============================================================
+  # Scenario 1: HS Chemistry teacher, two preps
+  # ============================================================
+  - id: chem
+    name: "Chemistry I"
+    subject_type: departmentalized
+    standards:
+      - path: "standards/oh-nglss-chem.pdf"
+    template:
+      path: "templates/weekly-chem.docx"
+      mapping_verified: true
+    schedule:
+      type: block
+      period_length_minutes: 90
+      days: [M, T, W, R, F]
+      periods_per_day: 2
+      rotation: null
+    frameworks: ["5e", "gradual-release"]
+    custom_framework_path: null
+    differentiation:
+      tiers: [novice, on-level, advanced]
+      populations: [ELL, SPED_IEP]
+    voice_profile: "past-plans/chem/voice-profile.md"
+    past_plans_dir: "past-plans/chem/"
+    pacing:
+      scope_and_sequence: "scope-and-sequence/chem-2025-26.md"
+      last_planned_week_end: "2026-04-18"
+      current_unit: "Thermochemistry"
+
+  - id: ap-chem
+    name: "AP Chemistry"
+    subject_type: departmentalized
+    standards:
+      - path: "standards/college-board-ap-chem.pdf"
+    template:
+      path: "templates/weekly-ap-chem.docx"
+      mapping_verified: true
+    schedule:
+      type: block
+      period_length_minutes: 90
+      days: [M, T, W, R, F]
+      periods_per_day: 1
+      rotation: null
+    frameworks: ["5e", "gradual-release"]
+    differentiation:
+      tiers: [on-level, advanced]    # no novice tier for AP
+      populations: [GIFTED]
+    voice_profile: "past-plans/chem/voice-profile.md"   # shared voice (same teacher)
+    past_plans_dir: "past-plans/ap-chem/"
+    pacing:
+      scope_and_sequence: "scope-and-sequence/ap-chem-2025-26.md"
+      last_planned_week_end: "2026-04-18"
+      current_unit: "Equilibrium"
+
+  # ============================================================
+  # Scenario 2: Elementary self-contained 3rd grade
+  # (Uncomment to use; comment out HS subjects above)
+  # ============================================================
+  # - id: grade-3-self-contained
+  #   name: "3rd Grade"
+  #   subject_type: elementary-self-contained
+  #   schedule:
+  #     type: elementary
+  #     total_instructional_minutes: 360
+  #     days: [M, T, W, R, F]
+  #     daily_blocks:
+  #       - { start: "08:30", end: "09:30", content_area: math }
+  #       - { start: "09:30", end: "10:30", content_area: ela }
+  #       - { start: "10:30", end: "10:45", content_area: null }
+  #       - { start: "10:45", end: "11:30", content_area: science }
+  #       - { start: "12:30", end: "13:15", content_area: social-studies }
+  #       - { start: "13:15", end: "14:00", content_area: writing }
+  #       - { start: "14:00", end: "14:45", content_area: specials }
+  #   content_areas:
+  #     - id: math
+  #       name: "3rd Grade Math"
+  #       standards: [{ path: "standards/ca-ccss-math-3.pdf" }]
+  #       template: { path: "templates/weekly-math.docx" }
+  #       pacing:
+  #         scope_and_sequence: "scope-and-sequence/math.md"
+  #         current_unit: "Multiplication and Division"
+  #     - id: ela
+  #       name: "3rd Grade ELA"
+  #       standards: [{ path: "standards/ca-ccss-ela-3.pdf" }]
+  #       template: { path: "templates/weekly-ela.docx" }
+  #     - id: science
+  #       name: "3rd Grade Science"
+  #       standards: [{ path: "standards/ca-ngss-3.pdf" }]
+  #       template: { path: "templates/weekly-science.docx" }
+  #     - id: social-studies
+  #       name: "3rd Grade Social Studies"
+  #       standards: [{ path: "standards/ca-ca-hss-3.pdf" }]
+  #       template: { path: "templates/weekly-ss.docx" }
+  #     - id: writing
+  #       name: "3rd Grade Writing"
+  #       standards: [{ path: "standards/ca-ccss-ela-3.pdf#writing" }]
+  #       template: { path: "templates/weekly-writing.docx" }
+  #   frameworks: ["gradual-release"]
+  #   differentiation:
+  #     tiers: [on-level, extension]
+  #     populations: [ELL, SPED_IEP]
+  #   voice_profile: "past-plans/voice-profile.md"
+  #   past_plans_dir: "past-plans/"
+
+defaults:
+  output_formats: [docx]  # v0.2.5 ships docx only; pdf is on the roadmap. classroom-artifacts handles pptx/docx separately.
+  research_depth: verified
+  compliance_mode: soft-warn
+  voice_match_level: calibrated
+  bonus_artifacts_prompt: true
+  calendar_path: "calendar/2025-26.ics"
+
+privacy:
+  student_data: never          # hard invariant; do not change
+  pii_scan_before_write: true
+  retention_days: 365
+  telemetry: off               # hard invariant; do not change
