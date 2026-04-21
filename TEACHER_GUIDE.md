@@ -84,8 +84,8 @@ You have two options for running Lesson Plan Magic. **Cowork is the recommended 
 | **Best for** | Most teachers | Teachers comfortable with a developer tool |
 | **Installation** | Drag-and-drop the `.plugin` file | File drop + one Terminal command |
 | **How you trigger skills** | Type `/lesson-planner` or `/classroom-artifacts` | Just talk — plain English |
-| **Connect your calendar** | Yes — connect Google Calendar or Outlook directly as a Connector | Upload an `.ics` file manually |
-| **Connect your email** | Yes — connect Gmail or Outlook to pull sub-day context | Not available |
+| **Connect your calendar** | Upload an `.ics` or PDF school calendar | Upload an `.ics` or PDF school calendar |
+| **Connect your email** | Not in the shipped v0.2.5 plugin | Not available |
 | **Output files** | Same `Documents/Lesson Plan Magic/outputs/` folder | Same folder |
 | **Python required** | Yes (one-time setup) | Yes (one-time setup) |
 
@@ -106,7 +106,7 @@ Both produce identical plans and artifacts. The difference is entirely in how yo
 - **Your district lesson plan template** — the `.docx` Word file your school requires you to fill out each week. If you don't have it digitally, ask your instructional coach or department chair.
 - **Your state standards** — a PDF, a URL to your state's standards page, or even pasted text. (If you don't have this, the plugin will still work — it just won't be able to cite standard codes.)
 - **A folder of past lesson plans** — even 5 or 10 old plans in Word format. The plugin reads these to learn how you write — your density, your warmth, your favorite activities — and applies that voice to everything it generates. The more you give it, the better the match.
-- **Your school calendar** — an `.ics` file exported from Google Calendar or Outlook, or a PDF. This lets the plugin skip holidays and testing windows automatically. (Cowork users can connect their calendar directly instead.)
+- **Your school calendar** — an `.ics` file exported from Google Calendar or Outlook, or a PDF. This lets the plugin skip holidays and testing windows automatically.
 
 ---
 
@@ -135,7 +135,7 @@ This is a one-time step. It gives the plugin the tools it needs to read and writ
 2. Copy and paste this command, then press Enter:
 
 ```
-pip install python-docx python-pptx pypdf requests beautifulsoup4 rapidfuzz pyyaml
+pip install python-docx python-pptx pypdf requests beautifulsoup4 rapidfuzz pyyaml defusedxml
 ```
 
 3. Wait for it to finish. You'll see text scroll by — that's normal.
@@ -146,21 +146,14 @@ pip install python-docx python-pptx pypdf requests beautifulsoup4 rapidfuzz pyya
 2. Copy and paste this command, then press Enter:
 
 ```
-pip install python-docx python-pptx pypdf requests beautifulsoup4 rapidfuzz pyyaml
+pip install python-docx python-pptx pypdf requests beautifulsoup4 rapidfuzz pyyaml defusedxml
 ```
 
 > **Tip:** If you see "pip not found," try `pip3` instead of `pip`.
 
-### Step 4 — Connect your calendar (optional but great)
+### Step 4 — Add your school calendar (optional but great)
 
-In Cowork, you can connect your real Google Calendar or Outlook calendar as a **Connector**. Once connected, the plugin automatically knows about holidays, half-days, and testing windows without you uploading anything.
-
-To connect:
-1. In Cowork, click **Connectors** in the sidebar.
-2. Find **Google Calendar** or **Microsoft Outlook Calendar**.
-3. Click **Connect** and sign in with your school account.
-
-You can also connect Gmail or Outlook email if you want the plugin to be able to reference upcoming events you've received.
+Export an `.ics` file from Google Calendar or Outlook, or use a PDF from your district website. Upload it during setup, or later by saying `Update my config.` Once loaded, the plugin automatically knows about holidays, half-days, and testing windows without you retyping them.
 
 ### Step 5 — Start using it
 
@@ -305,7 +298,7 @@ What to upload: a folder of Word documents (`.docx`). Old plans, observation-day
 
 ### Step 6 — School calendar (optional)
 
-If you **didn't** connect your calendar as a Cowork Connector in Step 4 of installation, you can upload your school-year calendar here: an `.ics` file from Google Calendar or Outlook, or a PDF from your district's website.
+You can upload your school-year calendar here: an `.ics` file from Google Calendar or Outlook, or a PDF from your district's website.
 
 With a calendar loaded, the plugin automatically skips holidays, avoids planning on testing days, and re-sequences around half-days. Without it, mention special days when you ask for a plan ("skip Thursday — it's a half day").
 
@@ -609,7 +602,7 @@ Chemistry I — Exit Ticket
 ★ Extension (if finished): Balance: CH₄ + O₂ → CO₂ + H₂O
 ```
 
-**Output file:** `2026-04-21_chem_exit-ticket.docx`
+**Output file:** `2026-04-21_chem_exit-ticket.docx` or `2026-04-21_chem_exit-ticket.txt` for Google Forms mode
 
 ---
 
@@ -791,7 +784,9 @@ Change my voice match level to strict — I have a big observation coming up.
 - **Never write a student's name.** If you mention "Jamie needs extended time," the plan says "students with extended-time accommodations" — not Jamie's name.
 - **Never invent a standard code.** If it can't find a real code, it says so.
 - **Never include a broken link.** Unverified resources are described in plain English, not written as links.
-- **Never send your data anywhere.** The plugin works entirely on your computer. No telemetry, no phone-home. This is a hard setting that cannot be changed.
+- **Never add plugin telemetry or hosted storage.** Generated files stay local by default and `privacy.telemetry: off` is hard-coded. If you ask for verified links or provide a standards URL, the plugin makes normal outbound web requests from your machine to fetch or verify that content.
+
+Lesson Plan Magic runs inside Cowork or Claude Code, so your planning conversation follows the normal privacy and security model of that host app.
 
 ### Built-in privacy scan
 
@@ -831,7 +826,7 @@ You can do either. `/lesson-planner Plan my week for Chemistry` and just `Plan m
 
 **Q: What's the difference between Cowork and Claude Code — really?**
 
-They're both AI assistants that run this plugin. Cowork is a cleaner, more approachable desktop app for knowledge workers — it has a plugin installer built right in, a `/skills` menu, and can connect directly to your calendar and email. Claude Code is a more technical tool aimed at developers. If you're not sure which to use, choose Cowork.
+They're both AI assistants that run this plugin. Cowork is a cleaner, more approachable desktop app for knowledge workers — it has a plugin installer built right in and a `/skills` menu. Claude Code is a more technical tool aimed at developers. If you're not sure which to use, choose Cowork.
 
 ---
 
@@ -965,7 +960,7 @@ In Cowork, type `/` to see all available skills at any time.
 | Upload new template | `I have a new district template to upload.` |
 | Upload new standards | `Upload new standards for [subject].` |
 | Approve a name | `Add "[name]" to my approved names list.` |
-| Connect calendar (Cowork) | Use the Connectors panel in the Cowork sidebar |
+| Add school calendar | Upload an `.ics` or PDF during onboarding, or say `Update my config.` |
 
 ### Output file location
 
@@ -978,7 +973,7 @@ File naming: `YYYY-MM-DD_subjectid_type.ext`
 |---|---|
 | Weekly plan | `2026-04-21_to_2026-04-25_chem.docx` |
 | Agenda slide | `2026-04-21_chem_agenda.pptx` |
-| Exit ticket | `2026-04-21_chem_exit-ticket.docx` |
+| Exit ticket | `2026-04-21_chem_exit-ticket.docx` or `.txt` in Google Forms mode |
 | Do-now | `2026-04-21_chem_do-now.docx` |
 | Sub plan | `2026-04-21_chem_sub-plan.docx` |
 

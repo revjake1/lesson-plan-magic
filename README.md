@@ -29,9 +29,9 @@ The plugin has **two skills** that talk to each other:
 | Skill | Trigger | What you get |
 |---|---|---|
 | **Lesson Planner** | `/lesson-planner` | A filled-in `.docx` lesson plan in your district's template — with real standard codes, learning intentions, differentiation, and verified resource links |
-| **Classroom Artifacts** | `/classroom-artifacts` | Agenda slides, exit tickets, do-nows, and sub plans — all pulled from your existing lesson plan automatically |
+| **Classroom Artifacts** | `/classroom-artifacts` | Agenda slides, exit tickets, do-nows, and sub plans — built from the lesson plan you just generated, or from the saved plan for that day |
 
-Both output to `Documents/Lesson Plan Magic/outputs/` on your computer. No cloud storage. No sharing. Files are yours.
+Both write files to `Documents/Lesson Plan Magic/outputs/` by default. Generated files stay on your computer unless you choose to share them.
 
 ---
 
@@ -55,7 +55,7 @@ Plans come out as filled `.docx` files in your district's template. Open them in
 | Artifact | Example request | Output |
 |---|---|---|
 | **Agenda slide** | `Agenda slide for today.` | `.pptx` — learning intention, success criteria, and agenda bullets, one slide per subject |
-| **Exit ticket** | `Exit ticket for Chemistry.` | `.docx` half-sheet — 2–3 content questions, one metacognitive prompt, optional extension |
+| **Exit ticket** | `Exit ticket for Chemistry.` | `.docx` half-sheet or Google Forms-ready `.txt` — 2–3 content questions, one metacognitive prompt, optional extension |
 | **Do-now / bell ringer** | `Do-now for tomorrow.` | `.docx` — self-explanatory, students start independently, no teacher setup required |
 | **Sub plan** | `Sub plan for tomorrow — I'm out sick.` | `.docx` — attendance procedure, activity, materials, backup plan, emergency contacts |
 
@@ -96,16 +96,14 @@ Get the free desktop app at [claude.ai/cowork](https://claude.ai/cowork) and ins
 Open **Terminal** (Mac) or **Command Prompt** (Windows) and paste:
 
 ```
-pip install python-docx python-pptx pypdf requests beautifulsoup4 rapidfuzz pyyaml
+pip install python-docx python-pptx pypdf requests beautifulsoup4 rapidfuzz pyyaml defusedxml
 ```
 
 Wait for it to finish — text will scroll by, that's normal. If you see "pip not found," try `pip3` instead.
 
-### Step 4 — Connect your calendar (optional, highly recommended)
+### Step 4 — Add your school calendar (optional, highly recommended)
 
-In Cowork: click **Connectors** in the sidebar → find **Google Calendar** or **Microsoft Outlook Calendar** → click **Connect**. Once connected, the plugin automatically skips holidays, testing days, and half-days without you having to mention them.
-
-You can also connect Gmail or Outlook if you want the plugin to reference upcoming events when writing sub plans.
+Export an `.ics` file from Google Calendar or Outlook, or use a PDF from your district website. Upload it during setup, or later by saying `Update my config.` Once loaded, the plugin automatically skips holidays, testing days, and half-days.
 
 ### Step 5 — Start your first planning session
 
@@ -124,7 +122,7 @@ Use this if you're already running Claude Code or your IT department has set it 
 3. Click **Install from file** and select the `.plugin` file. Enable it from the plugin list.
 4. Install Python tools — same command as above:
    ```
-   pip install python-docx python-pptx pypdf requests beautifulsoup4 rapidfuzz pyyaml
+   pip install python-docx python-pptx pypdf requests beautifulsoup4 rapidfuzz pyyaml defusedxml
    ```
 5. Just talk in plain English — `Plan my week for Chemistry` — the plugin recognizes planning requests automatically. No slash command needed.
 
@@ -144,7 +142,7 @@ The first time you trigger the lesson planner, it starts a guided conversation. 
 | 3 | Your subjects / preps | One entry per prep. Elementary teachers: one "subject" with content areas inside. |
 | 4 | Per-subject setup | Standards, district template, schedule, instructional framework, and differentiation populations — all in one message per subject, not nine separate questions. |
 | 5 | Past plans _(optional)_ | Drop a folder of old `.docx` plans. The plugin learns your voice from them. Even 5–10 makes a huge difference. |
-| 6 | School calendar _(optional)_ | Upload an `.ics` or PDF calendar, or use your Cowork Connector. Holidays and test days skip automatically. |
+| 6 | School calendar _(optional)_ | Upload an `.ics` or PDF calendar. Holidays and test days skip automatically. |
 
 At the end, the plugin writes a `config.yaml` to your Documents folder and gives you a plain-English summary of everything it learned.
 
@@ -211,6 +209,7 @@ Files are named by date and subject:
 unit_2026-04-21_to_2026-05-08_amer-lit.docx  ← unit plan
 2026-04-21_chem_agenda.pptx              ← agenda slide
 2026-04-21_chem_exit-ticket.docx         ← exit ticket
+2026-04-21_chem_exit-ticket.txt          ← Google Forms-ready exit ticket
 2026-04-22_chem_do-now.docx              ← do-now
 2026-04-24_chem_sub-plan.docx            ← sub plan
 ```
@@ -227,8 +226,10 @@ Four guarantees — hard-coded, not configurable:
 |---|---|
 | **Never writes student names** | Differentiation always uses population language: "students with extended-time accommodations" — never a student's name. FERPA-safe by design. |
 | **PII scan before every save** | Every file is scanned for names, SSNs, phone numbers, email addresses, student IDs, IEP phrasing, and medical notes before it's written to disk. If something is found, the file isn't saved and you'll see an explanation. |
-| **Runs entirely on your computer** | Nothing is sent to any server. `privacy.telemetry: off` is hard-coded and cannot be changed, even by an administrator. |
+| **No plugin telemetry or hosted storage** | Generated files stay local and `privacy.telemetry: off` is hard-coded. If you use verified links or standards URLs, the plugin makes normal outbound web requests from your machine to fetch or verify that content. |
 | **Never fabricates citations** | Every link is verified as live and accurate before inclusion. Unverified resources are described in plain English — never written as a fake link. |
+
+Lesson Plan Magic runs inside Cowork or Claude Code, so your planning conversation follows the normal privacy and security model of that host app.
 
 ---
 

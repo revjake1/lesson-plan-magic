@@ -659,10 +659,10 @@
       <ul class="skill-bullets">
         <li>Real standard codes from your uploaded state standards — never fabricated</li>
         <li>Learning intentions and success criteria on every day</li>
-        <li>Framework breakdown (5E, gradual release, workshop, SIOP, and more)</li>
+        <li>Framework breakdown: 5E, gradual release, workshop, SIOP, and more</li>
         <li>Differentiation for ELL, IEP/504, gifted, and tiered readiness — by population, never by name</li>
         <li>Verified resource links — confirmed live before they appear in your plan</li>
-        <li>Output: filled <code>.docx</code> in your district's template</li>
+        <li>Output: a filled Word document in your district's template</li>
       </ul>
     </div>
     <div class="skill-divider"></div>
@@ -671,10 +671,10 @@
       <h3>Classroom Artifacts</h3>
       <p class="skill-desc">All the short, printable things you need every day — pulled from your plan automatically.</p>
       <ul class="skill-bullets">
-        <li>Agenda slides (<code>.pptx</code>) — one per subject, learning intention and schedule pre-filled</li>
-        <li>Exit tickets (<code>.docx</code> half-sheet or Google Forms–ready text)</li>
-        <li>Do-nows / bell ringers (<code>.docx</code>) — students can start independently</li>
-        <li>Sub plans (<code>.docx</code>) — one page, any adult can run it</li>
+        <li>Agenda slides as PowerPoint — one per subject, learning intention and schedule pre-filled</li>
+        <li>Exit tickets as a Word half-sheet or Google Forms–ready text</li>
+        <li>Do-nows and bell ringers — students can start independently</li>
+        <li>Sub plans — one page, any adult can run it</li>
         <li>Never re-types your learning intention — pulls directly from the plan you already made</li>
       </ul>
     </div>
@@ -704,11 +704,11 @@
           </li>
           <li>
             <span class="pf-icon">✓</span>
-            Connect Google Calendar or Outlook directly — holidays skip automatically
+            Upload an exported <code>.ics</code> or PDF calendar so holidays skip automatically
           </li>
           <li>
             <span class="pf-icon">✓</span>
-            Connect Gmail or Outlook to pull upcoming context for sub plans
+            Google Forms-ready exit ticket text is built in
           </li>
           <li>
             <span class="pf-icon">✓</span>
@@ -772,15 +772,15 @@
         <div class="step-body">
           <h3>Install Python tools (one-time)</h3>
           <p>Open Terminal (Mac) or Command Prompt (Windows) and paste:</p>
-          <div class="cmd-block">pip install python-docx python-pptx pypdf requests beautifulsoup4 rapidfuzz pyyaml</div>
+          <div class="cmd-block">pip install python-docx python-pptx pypdf requests beautifulsoup4 rapidfuzz pyyaml defusedxml</div>
           <p style="margin-top:8px">If you see "pip not found," try <code>pip3</code> instead.</p>
         </div>
       </div>
       <div class="step">
         <div class="step-num">4</div>
         <div class="step-body">
-          <h3>Connect your calendar <span style="color:var(--muted);font-weight:400;font-size:14px">(optional but great)</span></h3>
-          <p>In Cowork: <strong>Connectors → Google Calendar</strong> or <strong>Outlook</strong>. Once connected, the plugin skips holidays, half-days, and testing windows without you mentioning them.</p>
+          <h3>Add your school calendar <span style="color:var(--muted);font-weight:400;font-size:14px">(optional but great)</span></h3>
+          <p>Export an <code>.ics</code> file from Google Calendar or Outlook, or use a PDF from your district website. Upload it during setup, or later with <code>Update my config</code>. Once loaded, the plugin skips holidays, half-days, and testing windows automatically.</p>
         </div>
       </div>
       <div class="step">
@@ -965,8 +965,8 @@
       </div>
       <div class="privacy-item">
         <div class="privacy-check">✓</div>
-        <h3>Runs entirely on your computer</h3>
-        <p>No telemetry. No phone-home. <code>privacy.telemetry: off</code> is hard-coded. Your plans, your standards, your students' data — none of it leaves your machine.</p>
+        <h3>No plugin telemetry or hosted storage</h3>
+        <p>Generated files stay local and <code>privacy.telemetry: off</code> is hard-coded. If you use verified links or standards URLs, the plugin makes normal outbound web requests from your machine to fetch or verify that content.</p>
       </div>
       <div class="privacy-item">
         <div class="privacy-check">✓</div>
@@ -1016,7 +1016,7 @@
             <tr><td>Daily plan</td><td><code>2026-04-25_chem.docx</code></td></tr>
             <tr><td>Unit plan</td><td><code>unit_2026-04-21_to_2026-05-08_amer-lit.docx</code></td></tr>
             <tr><td>Agenda slide</td><td><code>2026-04-21_chem_agenda.pptx</code></td></tr>
-            <tr><td>Exit ticket</td><td><code>2026-04-21_chem_exit-ticket.docx</code></td></tr>
+            <tr><td>Exit ticket</td><td><code>2026-04-21_chem_exit-ticket.docx</code> or <code>2026-04-21_chem_exit-ticket.txt</code></td></tr>
             <tr><td>Do-now</td><td><code>2026-04-21_chem_do-now.docx</code></td></tr>
             <tr><td>Sub plan</td><td><code>2026-04-21_chem_sub-plan.docx</code></td></tr>
           </tbody>
@@ -1068,11 +1068,11 @@
       </details>
       <details>
         <summary>What's the difference between Cowork and Claude Code — really?</summary>
-        <div class="faq-body">They both run the same plugin and produce identical output. Cowork is a cleaner, more approachable desktop app — it has a drag-and-drop plugin installer, a <code>/skills</code> menu, and can connect directly to your calendar and email. Claude Code is a more technical tool aimed at developers. If you're not sure which to use, choose Cowork.</div>
+        <div class="faq-body">They both run the same plugin and produce identical output. Cowork is a cleaner, more approachable desktop app with a drag-and-drop plugin installer and a <code>/skills</code> menu. Claude Code is a more technical tool aimed at developers. If you're not sure which to use, choose Cowork.</div>
       </details>
       <details>
         <summary>Is my students' data safe?</summary>
-        <div class="faq-body">Yes. The plugin runs entirely on your computer — nothing is sent to any server. Every file is scanned for PII before it's saved, and the plugin never writes a student's name into any output. See the <a href="#privacy">Privacy section</a> for the full list of guarantees.</div>
+        <div class="faq-body">Yes. Every file is scanned for PII before it's saved, and the plugin never writes a student's name into any output. Generated files stay local by default, with no plugin telemetry. If you use verified links or standards URLs, the plugin makes normal outbound web requests from your machine to fetch or verify that content. See the <a href="#privacy">Privacy section</a> for the full list of guarantees.</div>
       </details>
     </div>
   </div>
