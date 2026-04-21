@@ -1,0 +1,36 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install test dependencies
+        run: |
+          pip install -r plugin/skills/lesson-planner/scripts/requirements-dev.txt
+          pip install -r plugin/skills/classroom-artifacts/scripts/requirements.txt
+
+      - name: Run tests
+        run: make test
+
+      - name: Build plugin archive
+        run: make package
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/jakes-lesson-plan-magic.plugin
+          generate_release_notes: true
