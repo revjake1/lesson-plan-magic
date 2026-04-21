@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jake's Lesson Plan Magic — AI planning built for teachers</title>
+  <meta name="description" content="An AI planning assistant that writes your lesson plans in your voice, fills your district template, and hands you a finished Word document — not a wall of text to copy-paste." />
+  <style>
+    /* ─── Reset & base ─────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --teal:    #028090;
+      --teal-dk: #015f6b;
+      --teal-lt: #e0f4f6;
+      --cream:   #f7f4ef;
+      --sand:    #ede9e1;
+      --dark:    #1b2e35;
+      --mid:     #3d5a63;
+      --muted:   #6b8a93;
+      --coral:   #e05c5c;
+      --gold:    #d4a44c;
+      --white:   #ffffff;
+      --radius:  10px;
+      --shadow:  0 2px 18px rgba(2,128,144,.10);
+      --shadow-lg: 0 8px 40px rgba(2,128,144,.15);
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: var(--cream);
+      color: var(--dark);
+      line-height: 1.65;
+      font-size: 17px;
+    }
+    a { color: var(--teal); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    img { display: block; max-width: 100%; }
+
+    /* ─── Layout helpers ───────────────────────────────── */
+    .container { max-width: 1080px; margin: 0 auto; padding: 0 28px; }
+    .section { padding: 80px 0; }
+    .section--dark { background: var(--dark); color: var(--white); }
+    .section--teal { background: var(--teal); color: var(--white); }
+    .section--sand { background: var(--sand); }
+    .section-label {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--teal);
+      margin-bottom: 12px;
+    }
+    .section--dark .section-label,
+    .section--teal .section-label { color: rgba(255,255,255,.65); }
+    h2.section-title {
+      font-size: clamp(26px, 4vw, 38px);
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 16px;
+    }
+    .section-sub {
+      font-size: 18px;
+      color: var(--mid);
+      max-width: 640px;
+      margin-bottom: 52px;
+    }
+    .section--dark .section-sub,
+    .section--teal .section-sub { color: rgba(255,255,255,.75); }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+    @media (max-width: 860px) {
+      .grid-2 { grid-template-columns: 1fr; }
+      .grid-3 { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 560px) {
+      .grid-3, .grid-4 { grid-template-columns: 1fr; }
+      .section { padding: 56px 0; }
+    }
+
+    /* ─── Nav ──────────────────────────────────────────── */
+    nav {
+      background: var(--dark);
+      padding: 0 28px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 12px rgba(0,0,0,.3);
+    }
+    .nav-inner {
+      max-width: 1080px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 60px;
+    }
+    .nav-logo {
+      font-weight: 800;
+      font-size: 16px;
+      color: var(--white);
+      letter-spacing: -.01em;
+    }
+    .nav-logo span { color: var(--teal); }
+    .nav-links {
+      display: flex;
+      gap: 28px;
+      list-style: none;
+    }
+    .nav-links a {
+      color: rgba(255,255,255,.7);
+      font-size: 14px;
+      font-weight: 500;
+      transition: color .15s;
+    }
+    .nav-links a:hover { color: var(--white); text-decoration: none; }
+    @media (max-width: 600px) { .nav-links { display: none; } }
+
+    /* ─── Hero ─────────────────────────────────────────── */
+    .hero {
+      background: var(--dark);
+      color: var(--white);
+      padding: 100px 28px 90px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 70% 60% at 50% 0%, rgba(2,128,144,.25) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-badge {
+      display: inline-block;
+      background: rgba(2,128,144,.2);
+      border: 1px solid rgba(2,128,144,.4);
+      color: #5ecfda;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      padding: 5px 14px;
+      border-radius: 20px;
+      margin-bottom: 24px;
+    }
+    .hero h1 {
+      font-size: clamp(34px, 6vw, 64px);
+      font-weight: 900;
+      line-height: 1.08;
+      letter-spacing: -.02em;
+      max-width: 820px;
+      margin: 0 auto 22px;
+    }
+    .hero h1 em {
+      font-style: normal;
+      color: var(--teal);
+    }
+    .hero-sub {
+      font-size: clamp(16px, 2.2vw, 20px);
+      color: rgba(255,255,255,.7);
+      max-width: 580px;
+      margin: 0 auto 40px;
+      line-height: 1.6;
+    }
+    .btn-group { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      padding: 13px 26px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: transform .13s, box-shadow .13s;
+      white-space: nowrap;
+    }
+    .btn:hover { transform: translateY(-2px); text-decoration: none; }
+    .btn-primary {
+      background: var(--teal);
+      color: var(--white);
+      box-shadow: 0 4px 20px rgba(2,128,144,.35);
+    }
+    .btn-primary:hover { background: var(--teal-dk); box-shadow: 0 6px 28px rgba(2,128,144,.45); }
+    .btn-outline {
+      background: transparent;
+      color: var(--white);
+      border: 2px solid rgba(255,255,255,.35);
+    }
+    .btn-outline:hover { border-color: rgba(255,255,255,.7); }
+    .hero-version {
+      margin-top: 40px;
+      font-size: 13px;
+      color: rgba(255,255,255,.35);
+    }
+
+    /* ─── Skills strip ─────────────────────────────────── */
+    .skills-strip { background: var(--white); border-bottom: 1px solid #e8e2d8; }
+    .skills-inner {
+      max-width: 1080px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1px 1fr;
+      padding: 0 28px;
+    }
+    .skill-card { padding: 48px 32px; }
+    .skill-card + .skill-divider { background: #e8e2d8; }
+    .skill-chip {
+      display: inline-block;
+      background: var(--teal-lt);
+      color: var(--teal-dk);
+      font-family: "SF Mono", "Fira Mono", "Consolas", monospace;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 6px;
+      margin-bottom: 18px;
+    }
+    .skill-card h3 {
+      font-size: 22px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+    .skill-card .skill-desc {
+      color: var(--mid);
+      font-size: 15px;
+      margin-bottom: 22px;
+    }
+    .skill-bullets { list-style: none; }
+    .skill-bullets li {
+      font-size: 15px;
+      padding: 5px 0;
+      color: var(--dark);
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .skill-bullets li::before {
+      content: '✓';
+      color: var(--teal);
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    @media (max-width: 760px) {
+      .skills-inner { grid-template-columns: 1fr; }
+      .skill-divider { display: none; }
+      .skill-card { padding: 36px 28px; border-bottom: 1px solid #e8e2d8; }
+      .skill-card:last-child { border-bottom: none; }
+    }
+
+    /* ─── Path picker ──────────────────────────────────── */
+    .path-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .path-card {
+      background: var(--white);
+      border: 2px solid #ddd8ce;
+      border-radius: var(--radius);
+      padding: 32px;
+      position: relative;
+    }
+    .path-card.featured {
+      border-color: var(--teal);
+      box-shadow: var(--shadow-lg);
+    }
+    .path-badge {
+      position: absolute;
+      top: -13px;
+      left: 24px;
+      background: var(--teal);
+      color: var(--white);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 20px;
+    }
+    .path-card h3 {
+      font-size: 22px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+    .path-card .path-sub {
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+    .path-features { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .path-features li {
+      font-size: 15px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .path-features li .pf-icon {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--teal-lt);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 11px;
+      color: var(--teal-dk);
+      font-weight: 700;
+      margin-top: 2px;
+    }
+    .path-note {
+      margin-top: 28px;
+      font-size: 13px;
+      color: var(--muted);
+      text-align: center;
+      padding-top: 20px;
+      border-top: 1px solid #e8e2d8;
+    }
+    @media (max-width: 700px) { .path-grid { grid-template-columns: 1fr; } }
+
+    /* ─── Install steps ────────────────────────────────── */
+    .steps { display: flex; flex-direction: column; gap: 0; }
+    .step {
+      display: grid;
+      grid-template-columns: 64px 1fr;
+      gap: 0 20px;
+      position: relative;
+    }
+    .step:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      left: 31px;
+      top: 60px;
+      width: 2px;
+      height: calc(100% - 20px);
+      background: #d5cfc4;
+    }
+    .step-num {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      background: var(--teal);
+      color: var(--white);
+      font-size: 17px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 1;
+      margin-top: 8px;
+    }
+    .step-body { padding: 8px 0 36px; }
+    .step-body h3 { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+    .step-body p { font-size: 15px; color: var(--mid); line-height: 1.55; }
+    .step-body code {
+      display: inline-block;
+      background: #eae6de;
+      border-radius: 5px;
+      font-family: "SF Mono", "Fira Mono", monospace;
+      font-size: 13px;
+      padding: 3px 8px;
+      color: var(--dark);
+      word-break: break-all;
+    }
+    .step-body .cmd-block {
+      margin-top: 10px;
+      background: #1b2e35;
+      color: #7dd4da;
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-family: "SF Mono", "Fira Mono", monospace;
+      font-size: 13px;
+      overflow-x: auto;
+    }
+
+    /* ─── Example block ────────────────────────────────── */
+    .example-wrap {
+      display: grid;
+      grid-template-columns: 1fr 1.1fr;
+      gap: 48px;
+      align-items: start;
+    }
+    .example-prose h3 { font-size: 20px; font-weight: 800; margin-bottom: 10px; }
+    .example-prose p { font-size: 15px; color: var(--mid); margin-bottom: 16px; }
+    .example-prose ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .example-prose ul li {
+      font-size: 15px;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+    .example-prose ul li::before {
+      content: '→';
+      color: var(--teal);
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .code-preview {
+      background: #1b2e35;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+    }
+    .code-bar {
+      background: #0e1f25;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .code-dot { width: 11px; height: 11px; border-radius: 50%; }
+    .code-dot:nth-child(1) { background: #ff5f57; }
+    .code-dot:nth-child(2) { background: #febc2e; }
+    .code-dot:nth-child(3) { background: #28c840; }
+    .code-bar-title {
+      margin-left: 8px;
+      font-size: 12px;
+      color: rgba(255,255,255,.4);
+      font-family: "SF Mono", monospace;
+    }
+    .code-body {
+      padding: 22px 24px;
+      font-family: "SF Mono", "Fira Mono", monospace;
+      font-size: 13px;
+      line-height: 1.7;
+      color: #a8c8ce;
+      white-space: pre;
+      overflow-x: auto;
+    }
+    .c-label { color: rgba(255,255,255,.35); }
+    .c-key { color: #7dd4da; }
+    .c-val { color: #c7e8a6; }
+    .c-head { color: #ffffff; font-weight: 700; }
+    .c-tag { color: #f9c74f; }
+    .c-diff { color: #e05c5c; }
+    @media (max-width: 840px) {
+      .example-wrap { grid-template-columns: 1fr; }
+    }
+
+    /* ─── Artifacts grid ───────────────────────────────── */
+    .artifact-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 28px 24px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .artifact-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      margin-bottom: 4px;
+    }
+    .artifact-card h3 { font-size: 18px; font-weight: 800; }
+    .artifact-card .cmd {
+      font-family: "SF Mono", "Fira Mono", monospace;
+      font-size: 12px;
+      background: var(--teal-lt);
+      color: var(--teal-dk);
+      padding: 5px 10px;
+      border-radius: 5px;
+      display: inline-block;
+      align-self: flex-start;
+    }
+    .artifact-card p { font-size: 14px; color: var(--mid); line-height: 1.55; }
+    .artifact-card .output-tag {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      letter-spacing: .04em;
+      margin-top: auto;
+    }
+
+    /* ─── Privacy guarantees ───────────────────────────── */
+    .privacy-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .privacy-item {
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: var(--radius);
+      padding: 28px;
+    }
+    .privacy-check {
+      font-size: 24px;
+      color: #5ecfda;
+      font-weight: 900;
+      margin-bottom: 10px;
+    }
+    .privacy-item h3 { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
+    .privacy-item p { font-size: 14px; color: rgba(255,255,255,.65); line-height: 1.55; }
+    @media (max-width: 640px) { .privacy-grid { grid-template-columns: 1fr; } }
+
+    /* ─── Quick ref ────────────────────────────────────── */
+    .ref-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+    .ref-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    .ref-table th {
+      text-align: left;
+      font-weight: 700;
+      font-size: 12px;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 8px 12px;
+      border-bottom: 2px solid #e8e2d8;
+    }
+    .ref-table td {
+      padding: 9px 12px;
+      border-bottom: 1px solid #e8e2d8;
+      vertical-align: top;
+    }
+    .ref-table td code {
+      font-family: "SF Mono", "Fira Mono", monospace;
+      font-size: 12.5px;
+      background: var(--teal-lt);
+      color: var(--teal-dk);
+      padding: 2px 7px;
+      border-radius: 4px;
+    }
+    .ref-table td:last-child { color: var(--mid); }
+    .ref-label {
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--teal);
+      margin-bottom: 12px;
+    }
+    @media (max-width: 760px) { .ref-grid { grid-template-columns: 1fr; } }
+
+    /* ─── FAQ ──────────────────────────────────────────── */
+    .faq-list { max-width: 720px; }
+    details {
+      border-bottom: 1px solid #e8e2d8;
+    }
+    summary {
+      font-size: 17px;
+      font-weight: 600;
+      padding: 20px 0;
+      cursor: pointer;
+      list-style: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+    summary::-webkit-details-marker { display: none; }
+    summary::after {
+      content: '+';
+      font-size: 22px;
+      font-weight: 300;
+      color: var(--teal);
+      flex-shrink: 0;
+    }
+    details[open] summary::after { content: '−'; }
+    details .faq-body {
+      font-size: 15px;
+      color: var(--mid);
+      padding-bottom: 20px;
+      line-height: 1.65;
+    }
+    details .faq-body code {
+      font-family: "SF Mono", monospace;
+      font-size: 13px;
+      background: var(--teal-lt);
+      color: var(--teal-dk);
+      padding: 2px 7px;
+      border-radius: 4px;
+    }
+
+    /* ─── CTA ──────────────────────────────────────────── */
+    .cta-section {
+      text-align: center;
+      padding: 90px 28px;
+      background: var(--teal);
+      color: var(--white);
+    }
+    .cta-section h2 {
+      font-size: clamp(28px, 4vw, 44px);
+      font-weight: 900;
+      margin-bottom: 14px;
+    }
+    .cta-section p {
+      font-size: 18px;
+      color: rgba(255,255,255,.8);
+      margin-bottom: 36px;
+      max-width: 520px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .btn-white {
+      background: var(--white);
+      color: var(--teal-dk);
+      box-shadow: 0 4px 20px rgba(0,0,0,.15);
+    }
+    .btn-white:hover { background: var(--cream); }
+
+    /* ─── Footer ───────────────────────────────────────── */
+    footer {
+      background: var(--dark);
+      color: rgba(255,255,255,.45);
+      font-size: 13px;
+      padding: 32px 28px;
+      text-align: center;
+    }
+    footer a { color: rgba(255,255,255,.55); }
+    footer a:hover { color: var(--white); }
+  </style>
+</head>
+<body>
+
+<!-- ─── NAV ───────────────────────────────────────────── -->
+<nav>
+  <div class="nav-inner">
+    <div class="nav-logo">Jake's <span>Lesson Plan Magic</span></div>
+    <ul class="nav-links">
+      <li><a href="#skills">What it does</a></li>
+      <li><a href="#install">Install</a></li>
+      <li><a href="#examples">Examples</a></li>
+      <li><a href="#privacy">Privacy</a></li>
+      <li><a href="#faq">FAQ</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ─── HERO ──────────────────────────────────────────── -->
+<section class="hero">
+  <div class="hero-badge">v0.2.5 · Free · Open source</div>
+  <h1>Your AI planning partner —<br><em>built for teachers</em>, not tech people.</h1>
+  <p class="hero-sub">
+    Tell it what you're teaching. Get a finished Word document in your district's template,
+    in your voice, with real standard codes — not a wall of text to copy-paste.
+  </p>
+  <div class="btn-group">
+    <a class="btn btn-primary" href="#install">Get started →</a>
+    <a class="btn btn-outline" href="#skills">See what it does</a>
+  </div>
+  <div class="hero-version">Works with Cowork (recommended) and Claude Code</div>
+</section>
+
+<!-- ─── TWO SKILLS ────────────────────────────────────── -->
+<div class="skills-strip" id="skills">
+  <div class="skills-inner">
+    <div class="skill-card">
+      <div class="skill-chip">/lesson-planner</div>
+      <h3>Lesson Planner</h3>
+      <p class="skill-desc">Weekly, daily, or unit plans — filled into your district's template.</p>
+      <ul class="skill-bullets">
+        <li>Real standard codes from your uploaded state standards — never fabricated</li>
+        <li>Learning intentions and success criteria on every day</li>
+        <li>Framework breakdown (5E, gradual release, workshop, SIOP, and more)</li>
+        <li>Differentiation for ELL, IEP/504, gifted, and tiered readiness — by population, never by name</li>
+        <li>Verified resource links — confirmed live before they appear in your plan</li>
+        <li>Output: filled <code>.docx</code> in your district's template</li>
+      </ul>
+    </div>
+    <div class="skill-divider"></div>
+    <div class="skill-card">
+      <div class="skill-chip">/classroom-artifacts</div>
+      <h3>Classroom Artifacts</h3>
+      <p class="skill-desc">All the short, printable things you need every day — pulled from your plan automatically.</p>
+      <ul class="skill-bullets">
+        <li>Agenda slides (<code>.pptx</code>) — one per subject, learning intention and schedule pre-filled</li>
+        <li>Exit tickets (<code>.docx</code> half-sheet or Google Forms–ready text)</li>
+        <li>Do-nows / bell ringers (<code>.docx</code>) — students can start independently</li>
+        <li>Sub plans (<code>.docx</code>) — one page, any adult can run it</li>
+        <li>Never re-types your learning intention — pulls directly from the plan you already made</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ─── PICK YOUR PATH ────────────────────────────────── -->
+<section class="section section--sand">
+  <div class="container">
+    <div class="section-label">Getting started</div>
+    <h2 class="section-title">Two ways to run it</h2>
+    <p class="section-sub">Both produce identical plans and artifacts. The difference is only in how you install and interact.</p>
+
+    <div class="path-grid">
+      <div class="path-card featured">
+        <div class="path-badge">★ Recommended</div>
+        <h3>Cowork</h3>
+        <p class="path-sub">A purpose-built desktop app with a drag-and-drop plugin installer</p>
+        <ul class="path-features">
+          <li>
+            <span class="pf-icon">✓</span>
+            Drag-and-drop <code>.plugin</code> install — click Accept and you're done
+          </li>
+          <li>
+            <span class="pf-icon">✓</span>
+            Type <code>/lesson-planner</code> to trigger instantly; type <code>/</code> to browse all skills
+          </li>
+          <li>
+            <span class="pf-icon">✓</span>
+            Connect Google Calendar or Outlook directly — holidays skip automatically
+          </li>
+          <li>
+            <span class="pf-icon">✓</span>
+            Connect Gmail or Outlook to pull upcoming context for sub plans
+          </li>
+          <li>
+            <span class="pf-icon">✓</span>
+            Cleaner, more approachable interface — designed for knowledge workers
+          </li>
+        </ul>
+      </div>
+
+      <div class="path-card">
+        <h3>Claude Code</h3>
+        <p class="path-sub">The technical alternative if you're already using it</p>
+        <ul class="path-features">
+          <li>
+            <span class="pf-icon">✓</span>
+            Install via Settings → Plugins
+          </li>
+          <li>
+            <span class="pf-icon">✓</span>
+            Just talk in plain English — no slash command needed
+          </li>
+          <li>
+            <span class="pf-icon">✓</span>
+            Upload <code>.ics</code> calendar file manually
+          </li>
+          <li>
+            <span class="pf-icon">✓</span>
+            Good if your IT department has already set it up for you
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <p class="path-note">Both require Python 3.9+ (one-time setup) and a <a href="https://claude.ai">claude.ai</a> account.</p>
+  </div>
+</section>
+
+<!-- ─── INSTALL ────────────────────────────────────────── -->
+<section class="section" id="install">
+  <div class="container">
+    <div class="section-label">Installation — Cowork path</div>
+    <h2 class="section-title">Up and running in 5 steps</h2>
+    <p class="section-sub">No command-line experience needed. Python is the only prerequisite, and step 3 takes care of the rest.</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h3>Download and install Cowork</h3>
+          <p>Get the free desktop app from <a href="https://claude.ai/cowork">claude.ai/cowork</a> and install it like any Mac or Windows application.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h3>Install the plugin</h3>
+          <p>Locate <code>jakes-lesson-plan-magic.plugin</code> (it came with this package). Drag and drop it into the Cowork window, then click <strong>Accept</strong>. Done — two new skills appear.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h3>Install Python tools (one-time)</h3>
+          <p>Open Terminal (Mac) or Command Prompt (Windows) and paste:</p>
+          <div class="cmd-block">pip install python-docx python-pptx pypdf requests beautifulsoup4 rapidfuzz pyyaml</div>
+          <p style="margin-top:8px">If you see "pip not found," try <code>pip3</code> instead.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <h3>Connect your calendar <span style="color:var(--muted);font-weight:400;font-size:14px">(optional but great)</span></h3>
+          <p>In Cowork: <strong>Connectors → Google Calendar</strong> or <strong>Outlook</strong>. Once connected, the plugin skips holidays, half-days, and testing windows without you mentioning them.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <h3>Type <code>/lesson-planner</code> and follow the setup</h3>
+          <p>The first run is a 10–20 minute guided conversation — your name, subjects, standards, district template, and a folder of past plans (optional, but this is what makes it sound like you). Progress saves automatically, so interruptions are fine. You only do this once.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── WHAT FIRST-TIME SETUP COVERS ──────────────────── -->
+<section class="section section--sand">
+  <div class="container">
+    <div class="section-label">First-time setup</div>
+    <h2 class="section-title">A conversation, not a form</h2>
+    <p class="section-sub">Answer in plain English. Drop files any time. Progress saves after every step — if you get interrupted, pick up where you left off.</p>
+
+    <div class="grid-3">
+      <div class="artifact-card">
+        <div class="artifact-icon" style="background:#e0f4f6;">📋</div>
+        <h3>Your basics</h3>
+        <p>Name, state, school, and experience level. New teacher? Veteran? You'll get plans calibrated to how much you want explained.</p>
+      </div>
+      <div class="artifact-card">
+        <div class="artifact-icon" style="background:#fef3e2;">📚</div>
+        <h3>Your subjects &amp; standards</h3>
+        <p>Tell it your preps. Upload a PDF of your state standards, paste a URL, or skip — it still works, just without standard codes.</p>
+      </div>
+      <div class="artifact-card">
+        <div class="artifact-icon" style="background:#fde8e8;">🗓</div>
+        <h3>Schedule &amp; framework</h3>
+        <p>45-min periods? 90-min blocks? A/B rotation? Pick your instructional framework: 5E, gradual release, SWIRL, SIOP, UDL, and more.</p>
+      </div>
+      <div class="artifact-card">
+        <div class="artifact-icon" style="background:#eaf4e8;">📄</div>
+        <h3>District template</h3>
+        <p>Upload your district's <code>.docx</code> lesson plan file. No template? Choose from three built-in starters.</p>
+      </div>
+      <div class="artifact-card">
+        <div class="artifact-icon" style="background:#e8eaf6;">✍️</div>
+        <h3>Your voice (optional)</h3>
+        <p>Drop a folder of old lesson plans. The plugin reads them and learns your density, your warmth, your go-to activities. Even 5 old plans make a dramatic difference.</p>
+      </div>
+      <div class="artifact-card">
+        <div class="artifact-icon" style="background:#f3e8f6;">📅</div>
+        <h3>School calendar (optional)</h3>
+        <p>Upload an <code>.ics</code> or PDF, or connect your calendar in Cowork. Holidays and testing windows skip automatically.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── EXAMPLES ──────────────────────────────────────── -->
+<section class="section" id="examples">
+  <div class="container">
+    <div class="section-label">Lesson plans</div>
+    <h2 class="section-title">Say what you need. Get a finished document.</h2>
+    <p class="section-sub">The plugin asks 2–3 clarifying questions if needed, then runs each day in parallel so a full week doesn't take five times as long as a single day.</p>
+
+    <div class="example-wrap">
+      <div class="example-prose">
+        <h3>Example requests</h3>
+        <p>Use these exactly or adapt freely:</p>
+        <ul>
+          <li>Plan my week for Chemistry.</li>
+          <li>Plan the next three weeks of American Lit, ending with a Socratic seminar.</li>
+          <li>I need a polished daily plan for Thursday — my principal is observing.</li>
+          <li>Plan my week. (elementary — covers all content areas)</li>
+          <li>We had a fire drill. Re-plan Friday's lesson.</li>
+          <li>Sub plan for tomorrow — I'm out sick.</li>
+        </ul>
+
+        <h3 style="margin-top:28px;">What's in every plan</h3>
+        <ul>
+          <li>Real standard codes from your uploaded state standards</li>
+          <li>"I am learning… / I can…" on every day</li>
+          <li>Framework phases in the model you chose</li>
+          <li>Differentiation by population — never by student name</li>
+          <li>Evidence of learning and materials list</li>
+          <li>Verified links confirmed live before inclusion</li>
+        </ul>
+      </div>
+
+      <div class="code-preview">
+        <div class="code-bar">
+          <div class="code-dot"></div>
+          <div class="code-dot"></div>
+          <div class="code-dot"></div>
+          <div class="code-bar-title">2026-04-21_to_2026-04-25_chem.docx</div>
+        </div>
+        <div class="code-body"><span class="c-head">MONDAY — April 21, 2026</span>
+
+<span class="c-key">Standards:</span> <span class="c-val">HS-PS1-7</span> <span class="c-label">(conservation of mass)</span>
+
+<span class="c-key">I am learning:</span> <span class="c-val">To balance chemical equations</span>
+<span class="c-key">I can:</span>      <span class="c-val">Write balanced equations without a calculator</span>
+
+<span class="c-tag">Opening</span> <span class="c-label">(10 min)</span>
+  Do-now: "What stays the same when you burn wood?"
+  Review previous exit ticket — address top misconception.
+
+<span class="c-tag">I Do</span>   <span class="c-label">(20 min)</span>
+  Model H₂ + O₂ → H₂O. Think aloud: coefficient vs. subscript.
+  Common mistake: changing subscripts — address directly.
+
+<span class="c-tag">We Do</span>  <span class="c-label">(25 min)</span>
+  Pairs work through 3 progressively harder equations
+  on whiteboards. Circulate; listen for subscript errors.
+
+<span class="c-tag">You Do</span> <span class="c-label">(25 min)</span>
+  Independent: 5 equations from worksheet section A.
+  <span class="c-diff">IEP accommodations:</span> pre-filled reactant side.
+  <span class="c-val">Extension:</span> section B — polyatomic ions.
+
+<span class="c-tag">Closing</span> <span class="c-label">(10 min)</span>
+  Exit ticket + preview Tuesday lab.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── ARTIFACTS ─────────────────────────────────────── -->
+<section class="section section--sand">
+  <div class="container">
+    <div class="section-label">Classroom artifacts</div>
+    <h2 class="section-title">Everything else you need every day</h2>
+    <p class="section-sub">All artifacts pull their learning intention and agenda from your existing plan — you never retype anything.</p>
+
+    <div class="grid-4">
+      <div class="artifact-card">
+        <div class="artifact-icon" style="background:#e0f4f6;">📊</div>
+        <h3>Agenda Slide</h3>
+        <div class="cmd">/classroom-artifacts Agenda slide for today.</div>
+        <p>One slide per subject. Learning intention, success criteria, 3–6 agenda bullets, and tomorrow's materials — all pre-filled.</p>
+        <div class="output-tag">Output: .pptx</div>
+      </div>
+      <div class="artifact-card">
+        <div class="artifact-icon" style="background:#fef3e2;">📝</div>
+        <h3>Exit Ticket</h3>
+        <div class="cmd">/classroom-artifacts Exit ticket for Chemistry.</div>
+        <p>Half-sheet — print one page, cut in half. 2–3 content questions, one metacognitive prompt, optional extension. Or request Google Forms text.</p>
+        <div class="output-tag">Output: .docx or plain text</div>
+      </div>
+      <div class="artifact-card">
+        <div class="artifact-icon" style="background:#eaf4e8;">🔔</div>
+        <h3>Do-Now / Bell Ringer</h3>
+        <div class="cmd">/classroom-artifacts Do-now for tomorrow.</div>
+        <p>Students can start the moment they walk in. Spirals to prior content or activates today. Clear, self-explanatory — no teacher setup required.</p>
+        <div class="output-tag">Output: .docx</div>
+      </div>
+      <div class="artifact-card">
+        <div class="artifact-icon" style="background:#fde8e8;">🚪</div>
+        <h3>Sub Plan</h3>
+        <div class="cmd">/classroom-artifacts Sub plan for tomorrow.</div>
+        <p>One page. Any adult can run it. Includes attendance procedure, the activity, materials, a backup plan, and emergency contacts.</p>
+        <div class="output-tag">Output: .docx</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── PRIVACY ───────────────────────────────────────── -->
+<section class="section section--dark" id="privacy">
+  <div class="container">
+    <div class="section-label">Privacy &amp; student data</div>
+    <h2 class="section-title">Four guarantees. Hard-coded. Non-negotiable.</h2>
+    <p class="section-sub">These aren't settings. They can't be turned off, overridden, or changed by an administrator.</p>
+
+    <div class="privacy-grid">
+      <div class="privacy-item">
+        <div class="privacy-check">✓</div>
+        <h3>Never writes student names</h3>
+        <p>Differentiation always uses population language — "students with extended-time accommodations" — never a student's name. FERPA-safe by design.</p>
+      </div>
+      <div class="privacy-item">
+        <div class="privacy-check">✓</div>
+        <h3>PII scan before every save</h3>
+        <p>Every file is scanned for names, SSNs, phone numbers, email addresses, student IDs, medical notes, and IEP phrasing before it's written to disk. If something is found, the file isn't saved.</p>
+      </div>
+      <div class="privacy-item">
+        <div class="privacy-check">✓</div>
+        <h3>Runs entirely on your computer</h3>
+        <p>No telemetry. No phone-home. <code>privacy.telemetry: off</code> is hard-coded. Your plans, your standards, your students' data — none of it leaves your machine.</p>
+      </div>
+      <div class="privacy-item">
+        <div class="privacy-check">✓</div>
+        <h3>Never fabricates citations</h3>
+        <p>Every link in a plan is verified as live and accurate before inclusion. If a resource can't be confirmed, it's described in plain English — never written as a fake link.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── QUICK REFERENCE ───────────────────────────────── -->
+<section class="section">
+  <div class="container">
+    <div class="section-label">Quick reference</div>
+    <h2 class="section-title">Commands and output files</h2>
+    <p class="section-sub">Everything in one place. Pin this somewhere you can find it.</p>
+
+    <div class="ref-grid">
+      <div>
+        <div class="ref-label">Commands (Cowork)</div>
+        <table class="ref-table">
+          <thead>
+            <tr><th>Say this</th><th>What you get</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>/lesson-planner Plan my week for Chemistry.</code></td><td>Weekly plan</td></tr>
+            <tr><td><code>/lesson-planner Daily plan for Friday.</code></td><td>Daily plan</td></tr>
+            <tr><td><code>/lesson-planner Plan the next 3 weeks of Lit.</code></td><td>Unit plan</td></tr>
+            <tr><td><code>/classroom-artifacts Agenda slide for today.</code></td><td>Agenda slide</td></tr>
+            <tr><td><code>/classroom-artifacts Exit ticket for Chemistry.</code></td><td>Exit ticket</td></tr>
+            <tr><td><code>/classroom-artifacts Sub plan for tomorrow.</code></td><td>Sub plan</td></tr>
+            <tr><td><code>Update my config.</code></td><td>Change settings</td></tr>
+            <tr><td><code>Add a new subject — Geometry.</code></td><td>Add a prep</td></tr>
+          </tbody>
+        </table>
+        <p style="font-size:13px;color:var(--muted);margin-top:10px;">In Claude Code: just talk in plain English — no slash command needed.</p>
+      </div>
+      <div>
+        <div class="ref-label">Output files</div>
+        <p style="font-size:14px;color:var(--mid);margin-bottom:14px;">All files go to <code>Documents/Lesson Plan Magic/outputs/</code> on Mac and Linux, or <code>Documents\Lesson Plan Magic\outputs\</code> on Windows.</p>
+        <table class="ref-table">
+          <thead>
+            <tr><th>File type</th><th>Example filename</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Weekly plan</td><td><code>2026-04-21_to_2026-04-25_chem.docx</code></td></tr>
+            <tr><td>Daily plan</td><td><code>2026-04-25_chem.docx</code></td></tr>
+            <tr><td>Unit plan</td><td><code>unit_2026-04-21_to_2026-05-08_amer-lit.docx</code></td></tr>
+            <tr><td>Agenda slide</td><td><code>2026-04-21_chem_agenda.pptx</code></td></tr>
+            <tr><td>Exit ticket</td><td><code>2026-04-21_chem_exit-ticket.docx</code></td></tr>
+            <tr><td>Do-now</td><td><code>2026-04-21_chem_do-now.docx</code></td></tr>
+            <tr><td>Sub plan</td><td><code>2026-04-21_chem_sub-plan.docx</code></td></tr>
+          </tbody>
+        </table>
+        <p style="font-size:13px;color:var(--muted);margin-top:10px;">Double-click any <code>.docx</code> to open in Word or Google Docs. Double-click any <code>.pptx</code> for PowerPoint or Slides.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FAQ ───────────────────────────────────────────── -->
+<section class="section section--sand" id="faq">
+  <div class="container">
+    <div class="section-label">FAQ</div>
+    <h2 class="section-title">Common questions</h2>
+
+    <div class="faq-list">
+      <details>
+        <summary>Do I need a Claude.ai account?</summary>
+        <div class="faq-body">Yes — both Cowork and Claude Code run on Anthropic's Claude AI. You'll need a free or paid account at <a href="https://claude.ai">claude.ai</a>.</div>
+      </details>
+      <details>
+        <summary>What if I don't have my district's lesson plan template?</summary>
+        <div class="faq-body">Choose one of three built-in starters during onboarding: <strong>Weekly block</strong> (90-min periods), <strong>Weekly bell</strong> (5–7 period schedule), or <strong>Daily one-pager</strong>. You can always swap in your real template later by saying <code>I have a new district template to upload.</code></div>
+      </details>
+      <details>
+        <summary>What if I don't have my state standards?</summary>
+        <div class="faq-body">The plugin still works — it skips the standard-code step and flags that in the compliance notes. You can add standards at any time by saying <code>upload new standards for [subject]</code> and dropping a PDF or pasting a URL.</div>
+      </details>
+      <details>
+        <summary>Can elementary teachers use this?</summary>
+        <div class="faq-body">Yes. Self-contained classrooms are fully supported. You set up one "subject" (e.g., "3rd Grade") with content areas inside — math, reading, writing, science, social studies. The plugin generates one cohesive plan for your whole day.</div>
+      </details>
+      <details>
+        <summary>Can I use this for co-taught classes?</summary>
+        <div class="faq-body">Yes. During onboarding, say the class is co-taught and give your co-teacher's name and role (special education, ELL support, or content specialist). The differentiation sections will automatically include suggestions for splitting the instructional work between you.</div>
+      </details>
+      <details>
+        <summary>The plan doesn't sound like me. What do I do?</summary>
+        <div class="faq-body">First, check that you uploaded past plans during onboarding — voice matching gets dramatically better with even 5–10 old Word documents. If it still sounds off, say <code>The output doesn't sound like me — can you adjust the voice?</code> or <code>Set my voice match level to strict.</code></div>
+      </details>
+      <details>
+        <summary>I got interrupted during onboarding. How do I resume?</summary>
+        <div class="faq-body">Progress is saved automatically after every step. Just say <code>Resume my setup</code> and it picks up where you left off.</div>
+      </details>
+      <details>
+        <summary>Can it post directly to Google Classroom or Canvas?</summary>
+        <div class="faq-body">Not in this version — LMS integration is on the roadmap. For now, open the output file and upload manually. It takes about 10 seconds.</div>
+      </details>
+      <details>
+        <summary>What's the difference between Cowork and Claude Code — really?</summary>
+        <div class="faq-body">They both run the same plugin and produce identical output. Cowork is a cleaner, more approachable desktop app — it has a drag-and-drop plugin installer, a <code>/skills</code> menu, and can connect directly to your calendar and email. Claude Code is a more technical tool aimed at developers. If you're not sure which to use, choose Cowork.</div>
+      </details>
+      <details>
+        <summary>Is my students' data safe?</summary>
+        <div class="faq-body">Yes. The plugin runs entirely on your computer — nothing is sent to any server. Every file is scanned for PII before it's saved, and the plugin never writes a student's name into any output. See the <a href="#privacy">Privacy section</a> for the full list of guarantees.</div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ─── CTA ───────────────────────────────────────────── -->
+<section class="cta-section">
+  <h2>Ready to get your Sunday afternoons back?</h2>
+  <p>Open Cowork and type <code style="background:rgba(255,255,255,.15);color:#fff;padding:2px 8px;border-radius:5px;font-family:monospace;">/lesson-planner</code> — the plugin walks you through everything the first time.</p>
+  <div class="btn-group">
+    <a class="btn btn-white" href="https://claude.ai/cowork">Download Cowork →</a>
+  </div>
+</section>
+
+<!-- ─── FOOTER ────────────────────────────────────────── -->
+<footer>
+  <p>Jake's Lesson Plan Magic · v0.2.5 · MIT License · <a href="https://jakehallman.com">jakehallman.com</a></p>
+</footer>
+
+</body>
+</html>
