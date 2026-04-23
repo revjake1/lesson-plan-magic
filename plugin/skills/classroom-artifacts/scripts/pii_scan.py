@@ -44,7 +44,8 @@ def _read_text_file(path: Path, *, label: str) -> str:
     last_error: UnicodeDecodeError | None = None
     for encoding in encodings:
         try:
-            return raw.decode(encoding)
+            text = raw.decode(encoding)
+            return text.replace("\r\n", "\n").replace("\r", "\n")
         except UnicodeDecodeError as exc:
             last_error = exc
 

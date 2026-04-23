@@ -6,7 +6,7 @@
 
 <br>
 
-[![Version](https://img.shields.io/badge/version-0.3.2-028090?style=flat-square)](https://github.com/revjake1/lesson-plan-magic/releases)
+[![Version](https://img.shields.io/badge/version-0.3.3-028090?style=flat-square)](https://github.com/revjake1/lesson-plan-magic/releases)
 [![License: MIT](https://img.shields.io/badge/license-MIT-028090?style=flat-square)](LICENSE)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9%2B-028090?style=flat-square)](https://python.org)
 [![Works with Cowork](https://img.shields.io/badge/works%20with-Cowork-028090?style=flat-square)](https://claude.ai/cowork)
@@ -299,7 +299,7 @@ Double-click any `.docx` to open in Word or Google Docs. Double-click any `.pptx
 
 For lesson plans, the plugin also saves a `.plan.md` sidecar next to the `.docx`; that sidecar is what the classroom-artifacts skill reuses later. The helper scripts refuse to write outside `Documents/Lesson Plan Magic/outputs/` unless you explicitly override that fence.
 
-Current limits in `v0.3.2`: no PDF export, no native Google Forms creation, and no direct LMS posting. Exit tickets can produce Google Forms-ready `.txt`, but the actual form or LMS post is still manual.
+Current limits in `v0.3.3`: no PDF export, no native Google Forms creation, and no direct LMS posting. Exit tickets can produce Google Forms-ready `.txt`, but the actual form or LMS post is still manual.
 
 ---
 
@@ -318,7 +318,7 @@ You can edit this file directly, or say `Update my config` to let the plugin wal
 <summary><strong>Full config structure (click to expand)</strong></summary>
 
 ```yaml
-version: "0.3.2"
+version: "0.3.3"
 
 teacher:
   name: "Ms. Hallman"
@@ -647,4 +647,4 @@ For complete documentation including worked examples, framework walkthroughs, co
 
 MIT — see [LICENSE](LICENSE).
 
-*Jake's Lesson Plan Magic · v0.3.2 · [jakehallman.com](https://jakehallman.com)*
+*Jake's Lesson Plan Magic · v0.3.3 · [jakehallman.com](https://jakehallman.com)*

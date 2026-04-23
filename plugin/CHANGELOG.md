@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.3
+
+- Normalized lesson-plan markdown line endings after decode so artifact helpers behave the same on Windows and POSIX filesystems.
+- Swapped the generated `voice-profile.md` warning boilerplate to ASCII-safe text so Windows default readers and consoles do not choke on the file.
+
 ## 0.3.2
 
 - Hardened Windows path resolution so both skills honor explicit home-directory overrides consistently during CLI runs and packaged installs.

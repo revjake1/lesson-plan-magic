@@ -547,7 +547,7 @@ redactions: {redactions}
 dimensions: [layout, voice, activities, pacing]
 ---
 
-# Voice Profile — extracted from {source_count} past plans
+# Voice Profile - extracted from {source_count} past plans
 
 > This file is human-editable. The lesson-planner skill loads it as context before generating new plans. Edit freely; your changes override the auto-extracted values on the next run.
 
@@ -584,7 +584,7 @@ dimensions: [layout, voice, activities, pacing]
 
     md += "\n## Pacing (inferred)\n\n"
     for entry in pacing["entries"][:10]:
-        md += f"- {entry['date']} → {entry['topic']}\n"
+        md += f"- {entry['date']} -> {entry['topic']}\n"
 
     if pacing["skipped"] > 0:
         md += f"\n*Note: {pacing['skipped']} plan(s) had no parseable date.*\n"
@@ -593,10 +593,10 @@ dimensions: [layout, voice, activities, pacing]
 ## Notes
 
 - Redacted {redactions} plausible student names before analysis.
-- Source sample size: {source_count} plans — """
+- Source sample size: {source_count} plans -- """
 
     if source_count < 3:
-        md += f"**⚠️ Only {source_count} plans analyzed. Voice match will be approximate.**"
+        md += f"**Warning: Only {source_count} plans analyzed. Voice match will be approximate.**"
     else:
         md += "reliable match expected."
 

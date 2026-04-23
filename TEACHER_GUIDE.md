@@ -1,6 +1,6 @@
 # Jake's Lesson Plan Magic — Complete Teacher Guide
 
-> **Version 0.3.2 · For K-12 teachers · No tech experience required**
+> **Version 0.3.3 · For K-12 teachers · No tech experience required**
 
 ---
 
@@ -85,7 +85,7 @@ You have two options for running Lesson Plan Magic. **Cowork is the recommended 
 | **Installation** | Drag-and-drop the `.plugin` file | File drop + one Terminal command |
 | **How you trigger skills** | Type `/lesson-planner` or `/classroom-artifacts` | Just talk — plain English |
 | **Connect your calendar** | Upload an `.ics` or selectable-text PDF school calendar | Upload an `.ics` or selectable-text PDF school calendar |
-| **Connect your email** | Not in the shipped v0.3.2 plugin | Not available |
+| **Connect your email** | Not in the shipped v0.3.3 plugin | Not available |
 | **Output files** | Same `Documents/Lesson Plan Magic/outputs/` folder | Same folder |
 | **Python required** | Yes (one-time setup) | Yes (one-time setup) |
 
@@ -977,4 +977,4 @@ File naming: `YYYY-MM-DD_subjectid_type.ext`
 
 ---
 
-*Jake's Lesson Plan Magic · v0.3.2 · MIT License · jakehallman.com*
+*Jake's Lesson Plan Magic · v0.3.3 · MIT License · jakehallman.com*

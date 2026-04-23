@@ -551,7 +551,7 @@ class TestFormatMarkdownOutput:
         # Activity row rendered.
         assert "| gallery walk | 3" in md
         # Pacing entry rendered.
-        assert "2024-09-03 → Unit 1 kickoff" in md
+        assert "2024-09-03 -> Unit 1 kickoff" in md
         # Skipped-date footnote rendered.
         assert "1 plan(s) had no parseable date" in md
 
@@ -711,6 +711,9 @@ class TestCli:
         )
         assert result.returncode == 0
         assert "recommended" in result.stderr.lower()
+        md = output.read_text(encoding="utf-8")
+        assert "Warning: Only 1 plans analyzed." in md
+        assert "⚠" not in md
 
     def test_no_redact_flag(self, tmp_path):
         input_dir = tmp_path / "plans"
