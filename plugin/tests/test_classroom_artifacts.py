@@ -174,7 +174,7 @@ class TestStructuredPlanLoading:
             ),
             encoding="utf-8",
         )
-        stale_ns = plan.stat().st_mtime_ns + 1_000_000
+        stale_ns = json_sidecar.stat().st_mtime_ns + 1_000_000
         os.utime(plan, ns=(stale_ns, stale_ns))
 
         day = artifact_common.load_structured_day(

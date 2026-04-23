@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.4
+
+- No functional plugin changes; corrected a Windows-only stale-sidecar validation assumption so the 0.3.x release pipeline can publish cleanly across all supported OSes.
+
 ## 0.3.3
 
 - Normalized lesson-plan markdown line endings after decode so artifact helpers behave the same on Windows and POSIX filesystems.

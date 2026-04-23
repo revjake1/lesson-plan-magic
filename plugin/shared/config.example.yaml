@@ -8,7 +8,7 @@
 #
 # To try a specific scenario, copy one of the two subjects blocks.
 
-version: "0.3.3"
+version: "0.3.4"
 
 teacher:
   name: "Jane Smith"
@@ -123,7 +123,7 @@ subjects:
   #   past_plans_dir: "past-plans/"
 
 defaults:
-  output_formats: [docx]  # v0.3.3 ships docx only; pdf is on the roadmap. classroom-artifacts handles pptx/docx separately.
+  output_formats: [docx]  # v0.3.4 ships docx only; pdf is on the roadmap. classroom-artifacts handles pptx/docx separately.
   research_depth: verified
   compliance_mode: soft-warn
   voice_match_level: calibrated

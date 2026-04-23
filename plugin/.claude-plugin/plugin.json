@@ -1,7 +1,7 @@
 {
   "name": "jakes-lesson-plan-magic",
   "displayName": "Jake's Lesson Plan Magic",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "K-12 lesson planning assistant that learns your voice, uses your district's template, and respects your time. Generates weekly / daily / unit plans, agenda slides, exit tickets, do-nows, and sub plans with verified research and common student-PII safeguards enabled by default.",
   "author": {
     "name": "Jake Hallman",
