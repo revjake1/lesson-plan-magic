@@ -645,4 +645,4 @@ For complete documentation including worked examples, framework walkthroughs, co
 
 MIT — see [LICENSE](LICENSE).
 
-*Jake's Lesson Plan Magic · v0.2.5 · [jakehallman.com](https://jakehallman.com)*
+*Jake's Lesson Plan Magic · v0.2.5*
