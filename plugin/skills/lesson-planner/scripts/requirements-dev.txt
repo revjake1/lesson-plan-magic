@@ -1,6 +1,6 @@
 # Dev-only dependencies. Not required to run the plugin — only needed
 # when you're hacking on the scripts themselves.
--r ../../shared/runtime-requirements.lock.txt  # Keep tests on the packaged runtime set.
+-r ../../../shared/runtime-requirements.lock.txt  # Keep tests on the packaged runtime set.
 
 pytest>=8.0.0  # Test runner.
 pytest-cov>=4.1.0  # Coverage reporting during local development.

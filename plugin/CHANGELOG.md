@@ -1,12 +1,13 @@
 # Changelog
 
-## 0.3.0
+## 0.3.1
 
 - Added automatic first-run Python runtime bootstrap into the Lesson Plan Magic home, so packaged installs no longer require a manual `pip install`.
 - Replaced the shell-only packaging flow with cross-platform build and smoke-test scripts, and wired CI/release validation around the built `.plugin` archive.
 - Tightened public/plugin docs so artifact scope, calendar behavior, output boundaries, and citation verification claims match the shipped code.
 - Slimmed both skill entrypoints and split the old subagent playbook into small prompt contracts so Claude Code and Cowork load less instruction text on each run.
 - Added dense `.plan.json` and `voice-profile.json` sidecars, and taught artifact generation to prefer compact structured plan/day payloads before falling back to markdown.
+- Fixed the CI/release dependency install path so tagged releases validate correctly on GitHub Actions.
 
 ## Unreleased
 
