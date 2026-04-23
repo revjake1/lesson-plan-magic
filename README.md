@@ -113,12 +113,13 @@ Tell the plugin which framework(s) you use during setup, and every activity in y
 
 During setup, choose which populations to differentiate for in every plan. The plugin writes accommodation notes at the population level — never by student name.
 
-| Population tag | What appears in the plan |
-|---|---|
-| `ELL` | Language scaffolds, sentence frames, visual supports, vocabulary front-loading |
-| `IEP/504` | Extended-time notes, reduced-distraction alternatives, chunked directions, preferential seating suggestions |
-| `GIFTED` | Extension prompts, above-grade-level resources, choice boards, independent project options |
-| `TIERED_READINESS` | 2–3 readiness tiers (approaching / on-level / above) with different entry points for the same activity |
+| Population tag | Config value | What appears in the plan |
+|---|---|---|
+| **ELL** | `ELL` | Language scaffolds, sentence frames, visual supports, vocabulary front-loading |
+| **IEP accommodations** | `SPED_IEP` | Extended-time notes, reduced-distraction alternatives, chunked directions, preferential seating suggestions |
+| **504 accommodations** | `SPED_504` | Same accommodation language as IEP notes, scoped to 504 plans |
+| **Gifted** | `GIFTED` | Extension prompts, above-grade-level resources, choice boards, independent project options |
+| **Tiered readiness** | Use `tiers: [novice, on-level, advanced]` (or `[on-level, extension]`) | 2–3 readiness tiers with different entry points for the same activity |
 
 You can enable any combination. If you need a population not listed, describe it during setup.
 
@@ -322,7 +323,7 @@ version: "0.3.4"
 
 teacher:
   name: "Ms. Hallman"
-  experience_level: veteran      # new | mid-career | veteran | veteran-new-to-subject
+  experience_level: veteran      # new | mid-career | veteran | new-to-subject
   state: "GA"
   school: "Statesboro High"
   district: "Bulloch County Schools"
@@ -333,7 +334,7 @@ subjects:
     subject_type: departmentalized   # departmentalized | elementary-self-contained | co-taught
 
     standards:
-      path: ~/Documents/Lesson Plan Magic/standards/ga-science-standards.pdf
+      - path: ~/Documents/Lesson Plan Magic/standards/ga-science-standards.pdf
       # or: url: https://...
       # or: inline: "CHEM.1 Matter and its interactions..."
 
@@ -343,23 +344,23 @@ subjects:
 
     schedule:
       type: block              # block | bell | elementary | ab-rotation | custom
-      period_length: 90        # minutes
-      days: [Mon, Tue, Wed, Thu, Fri]
+      period_length_minutes: 90
+      days: [M, T, W, R, F]
       periods_per_day: 1
 
     frameworks:
       - 5e
       - gradual-release
-      # supported: 5e, gradual-release, workshop, siop, udl, direct-instruction,
-      #            pbl, hattie, marzano, swirl
+      # supported: 5e, gradual-release, workshop-model, siop, udl, direct-instruction,
+      #            project-based, hattie, marzano, swirl
       # custom: set custom_framework_path instead
 
     differentiation:
-      populations: [ELL, IEP_504, GIFTED, TIERED_READINESS]
+      populations: [ELL, SPED_IEP, GIFTED]
+      tiers: [novice, on-level, advanced]
 
-    voice_profile:
-      path: ~/Documents/Lesson Plan Magic/voice/chem_voice.json
-      # auto-generated from past_plans_dir during setup
+    voice_profile: ~/Documents/Lesson Plan Magic/voice/chem_voice.md
+    past_plans_dir: ~/Documents/Lesson Plan Magic/past-plans/chem/
 
     pacing:
       scope_and_sequence: ~/Documents/Lesson Plan Magic/scope/chem-scope.md
@@ -367,19 +368,22 @@ subjects:
       current_unit: "Stoichiometry"
 
 defaults:
-  output_format: docx          # docx | markdown | both
+  output_formats: [docx]       # v0.3.4 ships docx only; pdf is on the roadmap
   research_depth: verified     # off | generic-queries | verified
-  compliance_mode: true
+  compliance_mode: soft-warn   # strict | soft-warn | off
   voice_match_level: calibrated  # generic | calibrated | strict
+  bonus_artifacts_prompt: true
+  calendar_path: "calendar/2025-26.ics"
 
 privacy:
   student_data: never          # hard-coded — not user-configurable
   telemetry: off               # hard-coded — not user-configurable
   pii_scan_before_write: true  # hard-coded — not user-configurable
+  retention_days: 365          # advisory only; not auto-enforced by the plugin
 
 approved_names:
-  - "Ms. Rodriguez"            # names allowlisted past PII scanner
-  - "Mr. Chen"
+  - "Ms. Rodriguez"            # teacher.name and co_teacher_name are auto-allowlisted;
+  - "Mr. Chen"                 # add historical figures or other staff here as needed
 ```
 
 </details>
@@ -388,13 +392,13 @@ approved_names:
 
 | Field | What it controls |
 |---|---|
-| `experience_level` | How much pedagogy vocabulary appears in plans. `new` means more scaffolding, `veteran` means leaner prose. |
+| `experience_level` | How much pedagogy vocabulary appears in plans. `new` means more scaffolding, `veteran` means leaner prose. Valid values: `new` \| `mid-career` \| `veteran` \| `new-to-subject`. |
 | `subject_type` | `departmentalized` = single subject; `elementary-self-contained` = full day with content areas inside; `co-taught` = two teachers, split-instruction differentiation. |
 | `frameworks` | One or more framework IDs per subject. Activities in plans are labeled with that framework's phase names. |
 | `research_depth` | `off` = no external links; `generic-queries` = suggests resources without live link verification; `verified` = every link checked live before inclusion. |
 | `voice_match_level` | `generic` = no voice matching; `calibrated` = uses voice profile loosely; `strict` = maximally faithful to past-plan voice. |
-| `compliance_mode` | Adds a compliance summary at the top of every plan (standards addressed, differentiation populations covered). |
-| `approved_names` | Teacher/co-teacher/staff names that the PII scanner should pass through rather than flag. Does not allow student names. |
+| `compliance_mode` | How strictly to enforce the compliance checklist. `strict` blocks delivery on violations; `soft-warn` delivers with warnings at the top (default); `off` skips checking entirely. |
+| `approved_names` | Names the PII scanner passes through. The teacher's own name and any co-teacher name are auto-allowlisted. Add historical figures or other staff here. Student names must never appear here. |
 
 ---
 
