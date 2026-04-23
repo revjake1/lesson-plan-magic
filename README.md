@@ -366,7 +366,7 @@ subjects:
 
 defaults:
   output_format: docx          # docx | markdown | both
-  research_depth: verified     # off | generic | verified
+  research_depth: verified     # off | generic-queries | verified
   compliance_mode: true
   voice_match_level: calibrated  # generic | calibrated | strict
 
@@ -389,7 +389,7 @@ approved_names:
 | `experience_level` | How much pedagogy vocabulary appears in plans. `new` means more scaffolding, `veteran` means leaner prose. |
 | `subject_type` | `departmentalized` = single subject; `elementary-self-contained` = full day with content areas inside; `co-taught` = two teachers, split-instruction differentiation. |
 | `frameworks` | One or more framework IDs per subject. Activities in plans are labeled with that framework's phase names. |
-| `research_depth` | `off` = no external links; `generic` = links included without live verification; `verified` = every link checked live before inclusion. |
+| `research_depth` | `off` = no external links; `generic-queries` = suggests resources without live link verification; `verified` = every link checked live before inclusion. |
 | `voice_match_level` | `generic` = no voice matching; `calibrated` = uses voice profile loosely; `strict` = maximally faithful to past-plan voice. |
 | `compliance_mode` | Adds a compliance summary at the top of every plan (standards addressed, differentiation populations covered). |
 | `approved_names` | Teacher/co-teacher/staff names that the PII scanner should pass through rather than flag. Does not allow student names. |

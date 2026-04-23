@@ -180,13 +180,13 @@ Use this path if you're already running Claude Code, or if your IT department ha
 **On Mac:**
 
 ```
-pip install python-docx python-pptx pypdf requests beautifulsoup4 rapidfuzz pyyaml
+pip install python-docx python-pptx pypdf requests beautifulsoup4 rapidfuzz pyyaml defusedxml
 ```
 
 **On Windows:**
 
 ```
-pip install python-docx python-pptx pypdf requests beautifulsoup4 rapidfuzz pyyaml
+pip install python-docx python-pptx pypdf requests beautifulsoup4 rapidfuzz pyyaml defusedxml
 ```
 
 > **Tip:** If you see "pip not found," try `pip3` instead of `pip`.
@@ -296,7 +296,21 @@ What to upload: a folder of Word documents (`.docx`). Old plans, observation-day
 
 ---
 
-### Step 6 — School calendar (optional)
+### Step 6 — Your writing style
+
+> "A few quick questions about how you plan — I'll use these even before I've fully analyzed your past plans."
+
+It asks three things:
+
+1. **Script vs. outline** — "Are your plans closer to a word-by-word script, or bullet points you fill in live?" This affects how much prose appears vs. terse bullets.
+2. **Core model** — "Do you lean toward direct instruction, inquiry/discovery, workshop, project-based, or a mix?" Even if you set a framework in Step 4, this tells it your default instinct.
+3. **Warmth** — "Do you like personality in your plans — humor, asides, a note like 'kids will groan at this'? Or do you prefer a clean clinical format?"
+
+If you uploaded past plans in Step 5 and they already answered these questions clearly, the plugin confirms rather than re-asking.
+
+---
+
+### Step 7 — School calendar (optional)
 
 You can upload your school-year calendar here: an `.ics` file from Google Calendar or Outlook, or a PDF from your district's website.
 
@@ -304,7 +318,18 @@ With a calendar loaded, the plugin automatically skips holidays, avoids planning
 
 ---
 
-### Step 7 — All set
+### Step 8 — Output preferences
+
+Two quick housekeeping questions:
+
+- **LMS:** "Do you post plans to an LMS — Google Classroom, Canvas, Schoology? (This version outputs files for manual upload; direct LMS posting is planned for a future release.)"
+- **Output format:** "`.docx` filled with your district template is always produced. Do you also want a plain-text sidecar?"
+
+You can skip both — the defaults (`.docx` only, no LMS) work fine.
+
+---
+
+### Step 9 — All set
 
 At the end, the plugin writes a file called `config.yaml` to your Documents folder and gives you a plain-English summary:
 
@@ -719,7 +744,10 @@ Files are named by date and subject:
 2026-04-22_chem_do-now.docx                  ← do-now
 2026-04-24_chem_sub-plan.docx                ← sub plan
 2026-04-21_to_2026-04-28_amer-lit.docx       ← weekly plan, American Literature
+2026-04-21_to_2026-04-25_chem.plan.md        ← sidecar used by classroom artifacts
 ```
+
+The `.plan.md` sidecar is a plain-text version of your lesson plan written alongside every `.docx`. The classroom-artifacts skill reads this file to pull your learning intentions and activities without opening the Word document — don't delete it if you want to generate artifacts for that plan later.
 
 **Opening files:** Double-click any `.docx` to open in Word or Google Docs. Double-click any `.pptx` to open in PowerPoint or Google Slides.
 
@@ -979,4 +1007,4 @@ File naming: `YYYY-MM-DD_subjectid_type.ext`
 
 ---
 
-*Jake's Lesson Plan Magic · v0.2.5 · MIT License · jakehallman.com*
+*Jake's Lesson Plan Magic · v0.2.5 · MIT License*
