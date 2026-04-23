@@ -839,6 +839,9 @@ def _home_root() -> Path:
     override = os.environ.get("LESSON_PLAN_MAGIC_HOME")
     if override:
         return Path(override).expanduser()
+    home_override = os.environ.get("HOME")
+    if home_override:
+        return Path(home_override).expanduser() / "Documents" / "Lesson Plan Magic"
     return Path.home() / "Documents" / "Lesson Plan Magic"
 
 

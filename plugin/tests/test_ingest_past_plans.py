@@ -622,6 +622,8 @@ class TestCli:
             capture_output=True, text=True,
         )
         assert result.returncode == 0, result.stderr
+        assert "✓" not in result.stdout
+        assert "OK:" in result.stdout
         assert output.exists()
         assert output.with_suffix(".json").exists()
         md = output.read_text()

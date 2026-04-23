@@ -180,6 +180,14 @@ class TestWriteConfigMutation:
         assert ok is False
         assert "mapping_verified" not in external.read_text(encoding="utf-8")
 
+    def test_home_root_prefers_home_env(self, tmp_path, monkeypatch):
+        fake_home = tmp_path / "home"
+        monkeypatch.delenv("LESSON_PLAN_MAGIC_HOME", raising=False)
+        monkeypatch.setenv("HOME", str(fake_home))
+        monkeypatch.setattr(ft.Path, "home", lambda: Path("/should-not-be-used"))
+
+        assert ft._home_root() == fake_home / "Documents" / "Lesson Plan Magic"
+
 class TestScanForPiiAllowlisting:
     """Test scan_for_pii with allowed_names allowlisting."""
 

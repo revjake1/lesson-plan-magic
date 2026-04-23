@@ -2,6 +2,7 @@
 """Lightweight PII scanner for classroom-artifacts."""
 from __future__ import annotations
 
+import locale
 import re
 import sys
 from pathlib import Path
@@ -25,6 +26,32 @@ from pii_common import normalize_scan_text, scan_text_for_pii_matches
 
 _IEP = re.compile(r"\b(IEP|BIP|504 plan|IEP goal|accommodations for \w+)\b", re.IGNORECASE)
 PLACEHOLDER_PATTERN = re.compile(r"\{\{[A-Z0-9_]+\}\}")
+
+
+def _read_text_file(path: Path, *, label: str) -> str:
+    try:
+        raw = path.read_bytes()
+    except OSError as exc:
+        raise ValueError(f"Could not read {label}: {exc}") from exc
+
+    encodings: list[str] = ["utf-8", "utf-8-sig"]
+    preferred = locale.getpreferredencoding(False)
+    if preferred:
+        normalized = preferred.lower().replace("_", "-")
+        if normalized not in {"utf-8", "utf8", "utf-8-sig"}:
+            encodings.append(preferred)
+
+    last_error: UnicodeDecodeError | None = None
+    for encoding in encodings:
+        try:
+            return raw.decode(encoding)
+        except UnicodeDecodeError as exc:
+            last_error = exc
+
+    encoding_list = ", ".join(encodings)
+    raise ValueError(
+        f"Could not decode {label}: {path}. Tried {encoding_list}."
+    ) from last_error
 
 
 # ---- Public API -----------------------------------------------------------
@@ -89,7 +116,7 @@ def load_plan_md(plan_path: Path) -> str:
 
     suffix = plan_path.suffix.lower()
     if suffix in (".md", ".markdown", ".txt"):
-        return plan_path.read_text(encoding="utf-8")
+        return _read_text_file(plan_path, label="plan markdown")
 
     if suffix == ".docx":
         sidecar = plan_path.with_suffix(".plan.md")
@@ -100,7 +127,7 @@ def load_plan_md(plan_path: Path) -> str:
                     f"{sidecar} is older than the .docx. Re-run fill_template.py "
                     f"or pass the fresh .plan.md path to --plan."
                 )
-            return sidecar.read_text(encoding="utf-8")
+            return _read_text_file(sidecar, label="plan sidecar markdown")
         raise FileNotFoundError(
             f"No sidecar markdown found for {plan_path}. "
             f"Expected {sidecar}. Re-run fill_template.py (sidecars are "

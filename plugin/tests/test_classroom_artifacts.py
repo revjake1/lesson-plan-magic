@@ -73,6 +73,16 @@ class TestLoadPlanMd:
         p.write_text(SAMPLE_PLAN_MD)
         assert pii_scan.load_plan_md(p) == SAMPLE_PLAN_MD
 
+    def test_reads_md_with_locale_fallback(self, tmp_path, monkeypatch):
+        p = tmp_path / "plan.md"
+        p.write_bytes(SAMPLE_PLAN_MD.encode("cp1252"))
+        monkeypatch.setattr(
+            pii_scan.locale,
+            "getpreferredencoding",
+            lambda _do_setlocale=False: "cp1252",
+        )
+        assert pii_scan.load_plan_md(p) == SAMPLE_PLAN_MD
+
     def test_reads_markdown_extension(self, tmp_path):
         p = tmp_path / "plan.markdown"
         p.write_text(SAMPLE_PLAN_MD)
@@ -787,6 +797,20 @@ class TestSubPlan:
 
 
 class TestOutputPathFencing:
+    def test_default_output_dir_prefers_home_env(self, tmp_path, monkeypatch):
+        fake_home = tmp_path / "home"
+        monkeypatch.delenv("LESSON_PLAN_MAGIC_HOME", raising=False)
+        monkeypatch.setenv("HOME", str(fake_home))
+        monkeypatch.setattr(
+            artifact_common.Path,
+            "home",
+            lambda: Path("/should-not-be-used"),
+        )
+
+        assert artifact_common.default_output_dir() == (
+            fake_home / "Documents" / "Lesson Plan Magic" / "outputs"
+        ).resolve()
+
     @pytest.mark.parametrize(
         ("runner", "output_name", "kwargs"),
         [

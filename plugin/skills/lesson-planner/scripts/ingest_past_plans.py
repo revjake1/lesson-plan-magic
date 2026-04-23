@@ -119,6 +119,11 @@ MAX_DOCX_TOTAL_UNCOMPRESSED_BYTES = 40 * 1024 * 1024
 MAX_DOCX_ENTRY_COUNT = 2048
 
 
+def _print_status(message: str) -> None:
+    """Emit a console status line using ASCII-only text."""
+    print(message.encode("ascii", "backslashreplace").decode("ascii"))
+
+
 def _validate_docx_package(doc_path: Path) -> None:
     with zipfile.ZipFile(doc_path) as zf:
         infos = zf.infolist()
@@ -674,7 +679,7 @@ def main():
     # Write outputs
     try:
         output_path.write_text(md_content, encoding="utf-8")
-        print(f"✓ Voice profile written to {output_path}")
+        _print_status(f"OK: Voice profile written to {output_path}")
     except Exception as e:
         logger.error(f"Failed to write {output_path}: {e}")
         return 1
@@ -701,12 +706,14 @@ def main():
                 json.dumps(sidecar, separators=(",", ":"), sort_keys=True),
                 encoding="utf-8",
             )
-            print(f"✓ JSON sidecar written to {json_path}")
+            _print_status(f"OK: JSON sidecar written to {json_path}")
         except Exception as e:
             logger.error(f"Failed to write {json_path}: {e}")
             return 1
 
-    print(f"✓ Analyzed {len(docs_data)} plans, redacted {total_redactions} names.")
+    _print_status(
+        f"OK: Analyzed {len(docs_data)} plans, redacted {total_redactions} names."
+    )
     return 0
 
 

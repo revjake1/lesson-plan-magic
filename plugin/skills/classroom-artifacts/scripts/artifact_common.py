@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import locale
 import os
 from pathlib import Path
 import sys
@@ -42,15 +43,44 @@ def _home_root() -> Path:
     override = os.environ.get("LESSON_PLAN_MAGIC_HOME")
     if override:
         return Path(override).expanduser()
+    home_override = os.environ.get("HOME")
+    if home_override:
+        return Path(home_override).expanduser() / "Documents" / "Lesson Plan Magic"
     return Path.home() / "Documents" / "Lesson Plan Magic"
 
 
-DEFAULT_CONFIG_PATH = _home_root() / "config.yaml"
-DEFAULT_OUTPUT_DIR = _home_root() / "outputs"
+def default_config_path() -> Path:
+    return _home_root() / "config.yaml"
 
 
 def default_output_dir() -> Path:
-    return DEFAULT_OUTPUT_DIR.resolve()
+    return (_home_root() / "outputs").resolve()
+
+
+def _read_user_text(path: Path, *, label: str) -> str:
+    try:
+        raw = path.read_bytes()
+    except OSError as exc:
+        raise ValueError(f"Could not read {label}: {exc}") from exc
+
+    encodings: list[str] = ["utf-8", "utf-8-sig"]
+    preferred = locale.getpreferredencoding(False)
+    if preferred:
+        normalized = preferred.lower().replace("_", "-")
+        if normalized not in {"utf-8", "utf8", "utf-8-sig"}:
+            encodings.append(preferred)
+
+    last_error: UnicodeDecodeError | None = None
+    for encoding in encodings:
+        try:
+            return raw.decode(encoding)
+        except UnicodeDecodeError as exc:
+            last_error = exc
+
+    encoding_list = ", ".join(encodings)
+    raise ValueError(
+        f"Could not decode {label}: {path}. Tried {encoding_list}."
+    ) from last_error
 
 
 def resolve_output_path(output_arg: str, *, allow_anywhere: bool = False) -> Path:
@@ -250,7 +280,7 @@ def load_structured_day(
 
 def load_config(config_arg: str | None) -> dict:
     """Load config YAML and fail closed on malformed or unreadable files."""
-    path = Path(config_arg).expanduser() if config_arg else DEFAULT_CONFIG_PATH
+    path = Path(config_arg).expanduser() if config_arg else default_config_path()
     if not path.exists():
         if config_arg:
             raise FileNotFoundError(f"Config file not found: {path}")
@@ -269,7 +299,7 @@ def load_config(config_arg: str | None) -> dict:
         )
 
     try:
-        data = yaml.safe_load(path.read_text(encoding="utf-8"))
+        data = yaml.safe_load(_read_user_text(path, label="config file"))
     except Exception as exc:
         raise ValueError(f"Could not load config: {exc}") from exc
 
