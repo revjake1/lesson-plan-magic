@@ -21,14 +21,15 @@ Optional post-write config mutations (opt-in via flags):
   --config PATH
       Override the default ~/Documents/Lesson Plan Magic/config.yaml.
   --allow-anywhere
-      Explicitly allow writing the output .docx and .plan.md sidecar
+      Explicitly allow writing the output .docx and .plan.md/.plan.json sidecars
       outside ~/Documents/Lesson Plan Magic/outputs/.
   --skip-docx-scan
       Skip scanning the template's own existing text before filling it.
       Intended only for debugging a known-clean legacy template.
   --no-sidecar
-      Opt out of writing markdown sidecar .plan.md (default: sidecar ON).
-      The sidecar is a private bridge to classroom-artifacts skill.
+      Opt out of writing plan sidecars .plan.md and .plan.json
+      (default: sidecars ON). These files are a private bridge to the
+      classroom-artifacts skill.
 
 Python: requires >=3.9.
 """
@@ -46,13 +47,21 @@ from datetime import datetime
 from pathlib import Path
 from typing import Iterable
 
-from docx import Document
-from docx.table import _Cell
-from docx.text.paragraph import Paragraph
-
 _SHARED_DIR = Path(__file__).resolve().parents[3] / "shared"
 if str(_SHARED_DIR) not in sys.path:
     sys.path.insert(0, str(_SHARED_DIR))
+
+try:
+    from runtime_bootstrap import ensure_plugin_runtime_or_exit
+except ImportError:  # pragma: no cover - exercised by isolated script tests
+    ensure_plugin_runtime_or_exit = None
+
+if ensure_plugin_runtime_or_exit is not None:
+    ensure_plugin_runtime_or_exit(__file__)
+
+from docx import Document
+from docx.table import _Cell
+from docx.text.paragraph import Paragraph
 
 from pii_common import scan_text_for_pii_matches
 
@@ -79,6 +88,7 @@ class WeekPlan:
 
 
 MAX_PLAN_BYTES = 5 * 1024 * 1024
+PLAN_SIDECAR_VERSION = 1
 
 HEADER_MAP = {
     "standards": "standards",
@@ -223,6 +233,71 @@ def _day_from_dict(day_dict: dict) -> DayPlan:
         evidence=_as_str(day_dict.get("evidence")),
         do_now=_as_str(day_dict.get("do_now")),
     )
+
+
+def _compact_text_list(values: list[str]) -> list[str]:
+    compacted: list[str] = []
+    for value in values:
+        text = str(value).strip()
+        if text:
+            compacted.append(text)
+    return compacted
+
+
+def _build_plan_sidecar_payload(week: WeekPlan) -> dict:
+    payload: dict[str, object] = {"v": PLAN_SIDECAR_VERSION, "d": []}
+    if week.week_of:
+        payload["w"] = week.week_of
+    if week.subject:
+        payload["s"] = week.subject
+    if week.teacher:
+        payload["t"] = week.teacher
+
+    day_payloads: list[dict[str, object]] = []
+    for day in week.days:
+        day_payload: dict[str, object] = {"dt": day.date}
+        if day.day_name:
+            day_payload["n"] = day.day_name
+        if day.standards:
+            day_payload["st"] = _compact_text_list(day.standards)
+        if day.learning_intention:
+            day_payload["li"] = day.learning_intention
+        if day.success_criteria:
+            day_payload["sc"] = _compact_text_list(day.success_criteria)
+        if day.agenda:
+            day_payload["ag"] = _compact_text_list(day.agenda)
+        if day.materials:
+            day_payload["m"] = _compact_text_list(day.materials)
+        if day.differentiation:
+            day_payload["df"] = _compact_text_list(day.differentiation)
+        if day.evidence:
+            day_payload["e"] = day.evidence
+        if day.do_now:
+            day_payload["do"] = day.do_now
+        day_payloads.append(day_payload)
+
+    payload["d"] = day_payloads
+    return payload
+
+
+def _serialize_sidecar_json(payload: dict) -> str:
+    return json.dumps(payload, separators=(",", ":"), sort_keys=True)
+
+
+def _existing_json_sidecar_matches(sidecar_path: Path, expected_payload: dict) -> bool:
+    try:
+        existing_text = sidecar_path.read_text(encoding="utf-8")
+    except OSError as exc:
+        raise OSError(
+            f"could not read existing JSON sidecar {sidecar_path}: {exc}"
+        ) from exc
+    try:
+        existing_payload = json.loads(existing_text)
+    except json.JSONDecodeError as exc:
+        raise ValueError(
+            f"existing JSON sidecar {sidecar_path} is invalid: {exc}"
+        ) from exc
+    return existing_payload == expected_payload
 
 
 # ---------------------------------------------------------------------------
@@ -871,7 +946,7 @@ def main() -> int:
     parser.add_argument(
         "--no-sidecar",
         action="store_true",
-        help="Skip writing markdown sidecar .plan.md file (default: sidecar is written).",
+        help="Skip writing plan sidecars .plan.md and .plan.json (default: sidecars are written).",
     )
 
     args = parser.parse_args()
@@ -1058,27 +1133,52 @@ def main() -> int:
             )
         return 2
 
-    sidecar_path = None
-    sidecar_unchanged = False
+    md_sidecar_path = None
+    md_sidecar_unchanged = False
+    json_sidecar_path = None
+    json_sidecar_unchanged = False
+    plan_sidecar_payload = _build_plan_sidecar_payload(week)
+    plan_sidecar_json = _serialize_sidecar_json(plan_sidecar_payload)
     if not args.no_sidecar:
-        sidecar_path = output_path.with_suffix(".plan.md")
-        if sidecar_path.exists():
+        md_sidecar_path = output_path.with_suffix(".plan.md")
+        if md_sidecar_path.exists():
             try:
-                existing = sidecar_path.read_text(encoding="utf-8")
+                existing = md_sidecar_path.read_text(encoding="utf-8")
             except OSError as exc:
                 print(
-                    f"Error: could not read existing sidecar {sidecar_path}: {exc}",
+                    f"Error: could not read existing sidecar {md_sidecar_path}: {exc}",
                     file=sys.stderr,
                 )
                 return 5
             if existing != md_content:
                 print(
-                    f"Error: refusing to overwrite existing sidecar {sidecar_path}. "
+                    f"Error: refusing to overwrite existing sidecar {md_sidecar_path}. "
                     "Delete it first if replacement is intentional.",
                     file=sys.stderr,
                 )
                 return 5
-            sidecar_unchanged = True
+            md_sidecar_unchanged = True
+
+        json_sidecar_path = output_path.with_suffix(".plan.json")
+        if json_sidecar_path.exists():
+            try:
+                matches_existing = _existing_json_sidecar_matches(
+                    json_sidecar_path, plan_sidecar_payload
+                )
+            except OSError as exc:
+                print(f"Error: {exc}", file=sys.stderr)
+                return 5
+            except ValueError as exc:
+                print(f"Error: {exc}", file=sys.stderr)
+                return 5
+            if not matches_existing:
+                print(
+                    f"Error: refusing to overwrite existing JSON sidecar {json_sidecar_path}. "
+                    "Delete it first if replacement is intentional.",
+                    file=sys.stderr,
+                )
+                return 5
+            json_sidecar_unchanged = True
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     doc.save(str(output_path))
@@ -1089,11 +1189,19 @@ def main() -> int:
     # a plan that failed privacy. Fail closed if a different sidecar already
     # exists; callers must intentionally remove or rename it first.
     if not args.no_sidecar:
-        if sidecar_unchanged:
-            print(f"Sidecar unchanged: {sidecar_path}", file=sys.stderr)
+        if md_sidecar_unchanged:
+            print(f"Sidecar unchanged: {md_sidecar_path}", file=sys.stderr)
         else:
-            sidecar_path.write_text(md_content, encoding="utf-8")
-            print(f"Wrote sidecar: {sidecar_path}", file=sys.stderr)
+            md_sidecar_path.write_text(md_content, encoding="utf-8")
+            print(f"Wrote sidecar: {md_sidecar_path}", file=sys.stderr)
+        if json_sidecar_unchanged:
+            print(
+                f"JSON sidecar unchanged: {json_sidecar_path}",
+                file=sys.stderr,
+            )
+        else:
+            json_sidecar_path.write_text(plan_sidecar_json, encoding="utf-8")
+            print(f"Wrote JSON sidecar: {json_sidecar_path}", file=sys.stderr)
 
     # Optional config mutations
     if args.mark_verified:

@@ -5,7 +5,7 @@ The teacher's config lives at `~/Documents/Lesson Plan Magic/config.yaml` (defau
 ## Top-level structure
 
 ```yaml
-version: "0.2.5"            # schema version — used for future migrations
+version: "0.3.0"            # schema version — used for future migrations
 teacher: {...}              # identity + experience level
 subjects: [...]             # one or more subject profiles
 defaults: {...}             # output prefs, research depth, compliance mode
@@ -161,7 +161,7 @@ subjects:
 
 ```yaml
 defaults:
-  output_formats: [docx]                          # v0.2.5 ships docx only; pdf and google-doc are planned
+  output_formats: [docx]                          # v0.3.0 ships docx only; pdf and google-doc are planned
 
   research_depth: verified                        # off | generic-queries | verified
     # off: no external resources suggested
@@ -179,7 +179,7 @@ defaults:
     # strict: apply voice-profile.md AND reject drafts that diverge significantly
 
   bonus_artifacts_prompt: true                    # after weekly plan, ask "want agenda slides / exit tickets / etc.?"
-  calendar_path: "calendar/2025-26.ics"           # optional
+  calendar_path: "calendar/2025-26.ics"           # optional; .ics or text-based .pdf
 ```
 
 ## `approved_names` block (top-level, optional)
@@ -230,7 +230,7 @@ privacy:
 - Content area IDs: kebab-case, standardized where possible: `math`, `ela`, `science`, `social-studies`, `writing`, `specials`.
 - Framework IDs: kebab-case, from the fixed list below.
 
-## Framework IDs (v0.2.5 supported)
+## Framework IDs (v0.3.0 supported)
 
 - `swirl` — Speaking, Writing, Interacting, Reading, Listening tagging
 - `udl` — Universal Design for Learning

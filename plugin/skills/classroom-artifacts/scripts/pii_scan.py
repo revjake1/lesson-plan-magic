@@ -7,11 +7,19 @@ import sys
 from pathlib import Path
 from typing import Any, Iterable, Optional
 
-from docx.text.paragraph import Paragraph
-
 _SHARED_DIR = Path(__file__).resolve().parents[3] / "shared"
 if str(_SHARED_DIR) not in sys.path:
     sys.path.insert(0, str(_SHARED_DIR))
+
+try:
+    from runtime_bootstrap import ensure_plugin_runtime_or_exit
+except ImportError:  # pragma: no cover - exercised by isolated script tests
+    ensure_plugin_runtime_or_exit = None
+
+if ensure_plugin_runtime_or_exit is not None:
+    ensure_plugin_runtime_or_exit(__file__)
+
+from docx.text.paragraph import Paragraph
 
 from pii_common import normalize_scan_text, scan_text_for_pii_matches
 

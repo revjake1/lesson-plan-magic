@@ -1,5 +1,6 @@
 """Pytest regression tests for parse_calendar.py BYDAY fix."""
 
+import json
 import subprocess
 import sys
 from pathlib import Path
@@ -14,6 +15,22 @@ SCRIPT_PATH = (
     Path(__file__).parent.parent
     / "skills" / "lesson-planner" / "scripts" / "parse_calendar.py"
 )
+
+
+def _build_pdf(path: Path, pages: list[str]) -> None:
+    """Write a simple extractable-text PDF containing the given page strings."""
+    from reportlab.lib.pagesizes import letter
+    from reportlab.pdfgen import canvas
+
+    c = canvas.Canvas(str(path), pagesize=letter)
+    _, height = letter
+    for page_text in pages:
+        y = height - 72
+        for line in page_text.splitlines() or [""]:
+            c.drawString(72, y, line)
+            y -= 14
+        c.showPage()
+    c.save()
 
 
 class TestExpandRruleWeeklyWithByday:
@@ -327,7 +344,102 @@ END:VCALENDAR
         assert "skipped 1 malformed VEVENT" in captured.err
 
 
+class TestParseCalendarPdfCli:
+    def test_cli_parses_extractable_text_pdf_calendar(self, tmp_path):
+        pdf_path = tmp_path / "district-calendar.pdf"
+        _build_pdf(
+            pdf_path,
+            [
+                "\n".join(
+                    [
+                        "2026-2027 District Student Calendar",
+                        "August",
+                        "10 Teacher Work Day",
+                        "September",
+                        "7 Labor Day - No School",
+                        "October",
+                        "12 Professional Development Day",
+                        "November",
+                        "23-27 Thanksgiving Break",
+                    ]
+                ),
+                "\n".join(
+                    [
+                        "January",
+                        "18 MLK Holiday",
+                        "March",
+                        "29-31 Spring Break",
+                        "April",
+                        "1-2 Spring Break",
+                    ]
+                ),
+            ],
+        )
+
+        result = subprocess.run(
+            [
+                sys.executable,
+                str(SCRIPT_PATH),
+                "--input",
+                str(pdf_path),
+                "--range",
+                "2026-09-01:2027-04-30",
+            ],
+            capture_output=True,
+            text=True,
+        )
+
+        assert result.returncode == 0, result.stderr
+        payload = json.loads(result.stdout)
+        assert payload["r"] == ["2026-09-01", "2027-04-30"]
+        assert payload["n"] == 13
+        assert payload["D"] == [
+            {"d": "2026-09-07", "t": "H", "s": "Labor Day - No School"},
+            {"d": "2026-10-12", "t": "P", "s": "Professional Development Day"},
+            {"d": "2026-11-23", "t": "H", "s": "Thanksgiving Break"},
+            {"d": "2026-11-24", "t": "H", "s": "Thanksgiving Break"},
+            {"d": "2026-11-25", "t": "H", "s": "Thanksgiving Break"},
+            {"d": "2026-11-26", "t": "H", "s": "Thanksgiving Break"},
+            {"d": "2026-11-27", "t": "H", "s": "Thanksgiving Break"},
+            {"d": "2027-01-18", "t": "H", "s": "MLK Holiday"},
+            {"d": "2027-03-29", "t": "H", "s": "Spring Break"},
+            {"d": "2027-03-30", "t": "H", "s": "Spring Break"},
+            {"d": "2027-03-31", "t": "H", "s": "Spring Break"},
+            {"d": "2027-04-01", "t": "H", "s": "Spring Break"},
+            {"d": "2027-04-02", "t": "H", "s": "Spring Break"},
+        ]
+
+
 class TestParseCalendarCli:
+    def test_cli_preserves_ics_behavior(self, tmp_path):
+        ics_path = tmp_path / "calendar.ics"
+        ics_path.write_text(
+            "BEGIN:VCALENDAR\n"
+            "BEGIN:VEVENT\n"
+            "DTSTART;VALUE=DATE:20260422\n"
+            "SUMMARY:Holiday\n"
+            "END:VEVENT\n"
+            "END:VCALENDAR\n",
+            encoding="utf-8",
+        )
+
+        result = subprocess.run(
+            [
+                sys.executable,
+                str(SCRIPT_PATH),
+                "--input",
+                str(ics_path),
+            ],
+            capture_output=True,
+            text=True,
+        )
+
+        assert result.returncode == 0, result.stderr
+        assert json.loads(result.stdout) == {
+            "n": 1,
+            "D": [{"d": "2026-04-22", "t": "H", "s": "Holiday"}],
+        }
+
     def test_cli_rejects_non_kebab_subject_id_for_cache_write(self, tmp_path):
         ics_path = tmp_path / "calendar.ics"
         ics_path.write_text(

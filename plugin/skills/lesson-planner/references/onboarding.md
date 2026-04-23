@@ -39,7 +39,7 @@ Record answers to `subjects[].*` in config.
 
 > "Drop a folder of past lesson plans if you have any. I'll extract your layout, voice, favorite activities, and pacing. More plans = better voice match. Skip if you don't have any."
 
-If provided: run `scripts/ingest_past_plans.py <folder>`. Writes `past-plans/<subject-id>/voice-profile.md` and sets `subjects[].voice_profile`.
+If provided: run `scripts/ingest_past_plans.py <folder>`. It writes `past-plans/<subject-id>/voice-profile.md` for humans, `past-plans/<subject-id>/voice-profile.json` for compact runtime use, and sets `subjects[].voice_profile`.
 
 ## Step 6 — Voice calibration (3 quick questions)
 
@@ -53,9 +53,9 @@ If past-plans analysis already answered these, CONFIRM don't re-ask. Store answe
 
 ## Step 7 — School calendar
 
-> "Upload your school-year calendar (.ics from Google/Outlook, or PDF). I'll know about holidays, testing, half days, PD days automatically."
+> "Upload your school-year calendar (.ics from Google/Outlook, or a PDF with selectable text). I'll know about holidays, testing, half days, PD days automatically."
 
-Store as `calendar/<year>.ics` (or `.pdf`). Set `defaults.calendar_path`.
+Store as `calendar/<year>.ics` or `calendar/<year>.pdf`. Set `defaults.calendar_path`.
 
 ## Step 8 — LMS + output prefs
 

@@ -10,7 +10,7 @@ How the skill adapts its output prose to match a teacher's established voice.
 - Formatting habits (headings, bullets, bold)
 
 ### Sources of voice signal (in priority order)
-1. `voice-profile.md` produced by `ingest_past_plans.py`
+1. `voice-profile.md` plus `voice-profile.json` produced by `ingest_past_plans.py`
 2. Teacher's answers during onboarding ("describe your teaching style in one sentence")
 3. Sample past plans the teacher uploaded but didn't ingest
 
@@ -27,4 +27,4 @@ How the skill adapts its output prose to match a teacher's established voice.
 
 ### Application
 
-v0.1 injects `voice-profile.md` as a system-prompt appendix before generating any prose section of the plan. Run after research verification, before compliance check.
+Prefer the compact JSON sidecar for routine runtime selection and excerpting. Load the markdown profile only when you need the human-edited nuance. Pass excerpts, not the whole profile, into drafting prompts. Run voice application after research verification and before compliance check.

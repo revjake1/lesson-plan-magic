@@ -14,32 +14,18 @@ Both skills share one config at `~/Documents/Lesson Plan Magic/config.yaml` and 
 ## Install
 
 1. Place the `.plugin` file into your Cowork plugins folder, or enable it via the plugin manager.
-2. Install the Python dependencies before first use:
-
-```
-pip install -r skills/lesson-planner/scripts/requirements.txt \
-  -r skills/classroom-artifacts/scripts/requirements.txt
-```
-
-3. First invocation triggers a 10-20 minute onboarding interview. You can upload past lesson plans (folder drop) and a standards PDF / URL instead of answering every question manually.
+2. Make sure Python 3.9+ is installed. The packaged plugin auto-installs its pinned Python helper packages on first use into `~/Documents/Lesson Plan Magic/.runtime/pyXY/site-packages/`.
+3. First invocation triggers a 10-20 minute onboarding interview. You can upload past lesson plans (folder drop), a standards PDF / URL, and a school calendar (`.ics` or PDF with selectable text) instead of answering every question manually.
 4. Generated files go to `~/Documents/Lesson Plan Magic/outputs/` on macOS and Linux, or `%USERPROFILE%\Documents\Lesson Plan Magic\outputs\` on Windows. Throughout this plugin, paths shown as `~/Documents/...` resolve via Python's `Path.home()` — you'll see them written in POSIX form in the docs even on Windows.
 
 ## Python dependencies
 
-Requires Python 3.9 or newer. The plan-generation scripts need `python-docx`, `python-pptx`, `pypdf`, `requests`, `beautifulsoup4`, `rapidfuzz`, and `pyyaml`. `ruamel.yaml` is optional — used when available to preserve comments during config mutations, and `pyyaml` is the fallback.
-
-Install:
-
-```
-pip install -r skills/lesson-planner/scripts/requirements.txt \
-  -r skills/classroom-artifacts/scripts/requirements.txt
-```
+Requires Python 3.9 or newer. Packaged installs do not need a manual `pip install`; the plugin bootstraps a pinned runtime automatically on first use. That bootstrap pulls from [`shared/runtime-requirements.lock.txt`](shared/runtime-requirements.lock.txt), so release smoke tests and end-user installs stay on the same dependency set. If bootstrap fails, the scripts print plain-English setup instructions rather than a traceback.
 
 If you're working on the scripts themselves, install the dev extras instead:
 
 ```
-pip install -r skills/lesson-planner/scripts/requirements-dev.txt \
-  -r skills/classroom-artifacts/scripts/requirements.txt
+pip install -r skills/lesson-planner/scripts/requirements-dev.txt
 ```
 
 ## Privacy
@@ -56,7 +42,7 @@ pip install -r skills/lesson-planner/scripts/requirements-dev.txt \
 
 The plan pipeline delegates to cheaper models wherever possible:
 
-- **Haiku** — compliance checks, agenda slides, exit tickets, do-nows, sub plans, LMS blurbs, single-cell template rewrites.
+- **Haiku** — compliance checks, agenda slides, exit tickets, do-nows, sub plans, and single-cell template rewrites.
 - **Sonnet** — per-day lesson drafts (parallel, one subagent per day), research-query selection, onboarding.
 - **Opus** — optional final voice polish when `defaults.voice_match_level: strict` or the teacher is being observed.
 

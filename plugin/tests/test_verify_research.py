@@ -5,9 +5,6 @@ import json
 import hashlib
 from pathlib import Path
 
-pytest.importorskip("rapidfuzz")
-pytest.importorskip("requests")
-
 from verify_research import (
     _parse_batch_line,
     fuzzy_title_match,

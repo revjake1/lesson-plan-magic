@@ -1,12 +1,10 @@
-name: Release
+name: CI
 
 on:
   push:
-    tags:
-      - 'v*'
-
-permissions:
-  contents: write
+    branches:
+      - main
+  pull_request:
 
 jobs:
   validate:
@@ -38,22 +36,3 @@ jobs:
 
       - name: Check dependency graph
         run: python -m pip check
-
-  build-and-release:
-    needs: validate
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Build plugin archive
-        run: python scripts/build_plugin.py --output dist/jakes-lesson-plan-magic.plugin
-
-      - name: Create GitHub release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: dist/jakes-lesson-plan-magic.plugin
-          generate_release_notes: true

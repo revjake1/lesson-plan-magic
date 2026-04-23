@@ -1,0 +1,19 @@
+# Pinned runtime dependencies for the packaged plugin's auto-bootstrap path.
+# Update intentionally and keep CI/package smoke on the same file.
+
+beautifulsoup4==4.14.3
+certifi==2026.2.25
+charset-normalizer==3.4.7
+defusedxml==0.7.1
+idna==3.11
+lxml==6.1.0
+Pillow==11.3.0
+pypdf==6.10.2
+PyYAML==6.0.3
+python-docx==1.2.0
+python-pptx==1.0.2
+ruamel.yaml==0.19.1
+soupsieve==2.8
+typing-extensions==4.15.0
+urllib3==2.5.0
+XlsxWriter==3.2.9

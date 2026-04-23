@@ -623,6 +623,7 @@ class TestCli:
         )
         assert result.returncode == 0, result.stderr
         assert output.exists()
+        assert output.with_suffix(".json").exists()
         md = output.read_text()
         # Redaction happened.
         assert "John Smith" not in md
@@ -650,6 +651,21 @@ class TestCli:
         # Dense short keys.
         assert "L" in data and "V" in data
         assert data["n"] == 3
+
+    def test_no_json_sidecar_skips_sidecar_output(self, tmp_path):
+        input_dir = tmp_path / "plans"
+        _seed_input_dir(input_dir)
+        output = tmp_path / "voice-profile.md"
+        result = subprocess.run(
+            [sys.executable, str(SCRIPT_PATH),
+             "--input-dir", str(input_dir),
+             "--output", str(output),
+             "--no-json-sidecar"],
+            capture_output=True, text=True,
+        )
+        assert result.returncode == 0, result.stderr
+        assert output.exists()
+        assert not output.with_suffix(".json").exists()
 
     def test_missing_input_dir(self, tmp_path):
         output = tmp_path / "out.md"

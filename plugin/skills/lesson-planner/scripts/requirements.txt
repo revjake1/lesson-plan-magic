@@ -1,18 +1,16 @@
-# Runtime dependencies for the plan-generation scripts.
-# Every entry below is imported somewhere in this folder — if you're
-# tempted to add one, grep first.
+# Direct runtime dependencies for the plan-generation scripts.
+# The packaged plugin auto-installs pinned versions from
+# ../../shared/runtime-requirements.lock.txt on first use. This file stays
+# human-readable for local development.
 #
 # Python: 3.9 or newer (see ../../.claude-plugin/plugin.json).
 
 # Document parsing / writing
 python-docx>=1.1.0              # .docx read/write (fill_template, ingest_past_plans)
-python-pptx>=0.6.23             # .pptx agenda slides (classroom-artifacts)
 pypdf>=4.0.0                    # PDF reading (parse_standards)
 
 # Web / research verification
-requests>=2.31.0                # HTTP (verify_research)
 beautifulsoup4>=4.12.0          # HTML parsing (verify_research)
-rapidfuzz>=3.5.0                # fuzzy title matching (verify_research)
 
 # Config I/O
 pyyaml>=6.0                     # config.yaml read/write (fill_template)

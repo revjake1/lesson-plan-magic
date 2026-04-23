@@ -97,6 +97,16 @@ OVERLAPPING_NAME_PAIR_PATTERN = re.compile(
 INITIAL_NAME_PATTERN = re.compile(
     rf"\b({NAME_WORD_PATTERN})[ \t]+([^\W\d_])\.(?=[\s,;:!?]|$)"
 )
+SINGLE_NAME_CONTEXT_PATTERN = re.compile(
+    rf"(?i:\b(?:today|review|ask|remind|allow|let|give|have|check|see|support|"
+    rf"seat|pair|move))\s+({NAME_WORD_PATTERN})\b"
+)
+SINGLE_NAME_CONTEXT_HINT_PATTERN = re.compile(
+    r"(?i)\b(?:extended time|preferential seating|missing work|late work|"
+    r"unfinished work|make[- ]up work|check[- ]in|attendance|absent|tardy|"
+    r"accommodations?|support|services?|504|iep|bip|fba|behavior|guardian|"
+    r"parent|nurse|medication|allergy|contact home|call home|conference)\b"
+)
 
 SENTENCE_STARTERS: set[str] = {
     "Review", "Introduce", "Discuss", "Explore", "Explain", "Present",
@@ -326,5 +336,24 @@ def scan_text_for_pii_matches(
         if first in SENTENCE_STARTERS or first in STRUCTURAL_WORDS:
             continue
         matches.append((label, "initial-form name"))
+
+    seen_single_names: set[str] = set()
+    for match in SINGLE_NAME_CONTEXT_PATTERN.finditer(text):
+        name = match.group(1)
+        display = _display_name_word(name)
+        display_lower = display.lower()
+        if display in seen_single_names:
+            continue
+        seen_single_names.add(display)
+        if not (_is_titlecase_name_word(name) or _is_upper_name_word(name)):
+            continue
+        if display_lower in allowlist_words_lower or display_lower in structural_lower:
+            continue
+        trailing = text[match.end(): match.end() + 120]
+        if not SINGLE_NAME_CONTEXT_HINT_PATTERN.search(trailing):
+            continue
+        if any(display_lower in matched_text.lower() for matched_text, _label in matches):
+            continue
+        matches.append((display, "single-name student context"))
 
     return matches

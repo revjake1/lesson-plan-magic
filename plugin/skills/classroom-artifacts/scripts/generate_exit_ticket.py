@@ -35,6 +35,18 @@ import sys
 from pathlib import Path
 from typing import Optional, Any
 
+_SHARED_DIR = Path(__file__).resolve().parents[3] / "shared"
+if str(_SHARED_DIR) not in sys.path:
+    sys.path.insert(0, str(_SHARED_DIR))
+
+try:
+    from runtime_bootstrap import ensure_plugin_runtime_or_exit
+except ImportError:  # pragma: no cover - exercised by isolated script tests
+    ensure_plugin_runtime_or_exit = None
+
+if ensure_plugin_runtime_or_exit is not None:
+    ensure_plugin_runtime_or_exit(__file__)
+
 from docx import Document
 from docx.shared import Pt
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
@@ -47,7 +59,7 @@ from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 _HERE = Path(__file__).resolve().parent
 if str(_HERE) not in sys.path:
     sys.path.insert(0, str(_HERE))
-from artifact_common import load_config, resolve_output_path
+from artifact_common import load_config, load_structured_day, resolve_output_path
 from pii_scan import (
     scan_for_pii,
     scan_docx_for_pii,
@@ -61,23 +73,22 @@ from content_schema import (
     load_and_validate_content,
     validate_exit_ticket_content,
 )
-from plan_parser import parse_plan
 
 
-def extract_day_fields(md: str, target_date: str) -> Optional[dict]:
-    """Pull the target date's sections from a weekly markdown plan."""
-    week = parse_plan(md)
-    for day in week.days:
-        if day.date != target_date:
-            continue
-        return {
-            "date": day.date,
-            "day_name": day.day_name,
-            "learning_intention": day.learning_intention,
-            "success_criteria": list(day.success_criteria),
-            "subject": week.subject,
-        }
-    return None
+def extract_day_fields(
+    plan_path: Path, target_date: str, *, plan_md: str
+) -> Optional[dict]:
+    """Pull the target date's sections from structured plan data."""
+    day = load_structured_day(plan_path, target_date, plan_md=plan_md)
+    if day is None:
+        return None
+    return {
+        "date": day["date"],
+        "day_name": day["day_name"],
+        "learning_intention": day["learning_intention"],
+        "success_criteria": list(day["success_criteria"]),
+        "subject": day["subject"],
+    }
 
 
 def _build_from_scratch(fields: dict, content: dict):
@@ -259,7 +270,7 @@ def main() -> int:
         return 1
 
     try:
-        fields = extract_day_fields(md, args.date)
+        fields = extract_day_fields(plan_path, args.date, plan_md=md)
     except ValueError as e:
         print(f"Error: {e}", file=sys.stderr)
         return 1

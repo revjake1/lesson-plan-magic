@@ -20,8 +20,7 @@ criteria.
 ### Output formats
 
 - Printable half-page (.docx, 2-up per page)
-- Google Form template (v0.2+)
-- LMS quiz import format: QTI or CSV (v0.2+)
+- Google Forms-ready plain text (`.txt`) for copy-paste
 
 ### Anti-patterns to avoid
 

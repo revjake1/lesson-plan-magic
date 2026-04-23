@@ -6,7 +6,7 @@
 
 <br>
 
-[![Version](https://img.shields.io/badge/version-0.2.5-028090?style=flat-square)](https://github.com/revjake1/lesson-plan-magic/releases)
+[![Version](https://img.shields.io/badge/version-0.3.0-028090?style=flat-square)](https://github.com/revjake1/lesson-plan-magic/releases)
 [![License: MIT](https://img.shields.io/badge/license-MIT-028090?style=flat-square)](LICENSE)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9%2B-028090?style=flat-square)](https://python.org)
 [![Works with Cowork](https://img.shields.io/badge/works%20with-Cowork-028090?style=flat-square)](https://claude.ai/cowork)
@@ -80,10 +80,10 @@ The `/classroom-artifacts` skill pulls content from your saved lesson plan for t
 
 | Artifact | Example request | Output format |
 |---|---|---|
-| **Agenda slide** | `Agenda slide for today.` | `.pptx` — one slide per subject, learning intention + success criteria + agenda bullets, ready to project |
+| **Agenda slide** | `Agenda slide for today.` | `.pptx` — a single slide for the requested subject/day, with learning intention, success criteria, and agenda bullets |
 | **Exit ticket** | `Exit ticket for Chemistry.` | `.docx` half-sheet for printing, or `.txt` optimized for Google Forms copy-paste — 2–3 content questions, one metacognitive prompt, optional extension |
 | **Do-now / bell ringer** | `Do-now for tomorrow.` | `.docx` — self-explanatory prompt students can start independently with no teacher setup |
-| **Sub plan** | `Sub plan for Friday — I'm out sick.` | `.docx` — attendance procedure, full activity instructions, materials, backup plan, and emergency contact section |
+| **Sub plan** | `Sub plan for Friday — I'm out sick.` | `.docx` — attendance procedure, activity, materials, backup plan, and emergency contact section |
 
 All artifacts scan for student PII before saving. The sub plan template uses fictional sample contacts — replace them with real ones after generation.
 
@@ -122,6 +122,8 @@ During setup, choose which populations to differentiate for in every plan. The p
 
 You can enable any combination. If you need a population not listed, describe it during setup.
 
+If you ask for artifacts across multiple subjects, the plugin generates one file per subject rather than a combined deck or packet.
+
 ---
 
 ## Before you start
@@ -135,7 +137,8 @@ You can enable any combination. If you need a population not listed, describe it
 - Your **district lesson plan template** — the `.docx` Word file your school requires. Ask your instructional coach if you don't have it.
 - Your **state standards** — a PDF of your state standards document, a URL to your state's standards page, or pasted text. The plugin indexes them locally; no standards are sent anywhere.
 - A **folder of past lesson plans** — even 5–10 old `.docx` files help. The plugin reads them to learn your voice, your density, and your go-to activity types.
-- Your **school calendar** — an `.ics` file exported from Google Calendar or Outlook, or a PDF from your district's website. Lets the plugin automatically skip holidays, testing days, and half-days.
+- Your **school calendar** — an `.ics` file exported from Google Calendar or Outlook, or a PDF with selectable text from your district website.
+- Your **school calendar** — an `.ics` file exported from Google Calendar or Outlook, or a PDF with selectable text from your district website. Lets the plugin automatically skip holidays, testing days, and half-days.
 
 ---
 
@@ -154,19 +157,17 @@ Get the free desktop app at [claude.ai/cowork](https://claude.ai/cowork) and ins
 3. Drag and drop the `.plugin` file into the Cowork window. A preview card appears.
 4. Click **Accept**. Two new skills appear: `/lesson-planner` and `/classroom-artifacts`.
 
-### Step 3 — Install Python tools (one time only)
+### Step 3 — Make sure Python is installed
 
-Open **Terminal** (Mac) or **Command Prompt** (Windows) and paste:
+Lesson Plan Magic needs **Python 3.9 or newer** on your computer, but you do **not** need to install its helper libraries by hand anymore. On first use, the plugin installs its own pinned Python helpers automatically into your Lesson Plan Magic folder.
 
-```
-pip install python-docx python-pptx pypdf requests beautifulsoup4 rapidfuzz pyyaml defusedxml
-```
+That first helper install may take a minute or two and needs normal internet access.
 
-Wait for it to finish — text will scroll by, that's normal. If you see "pip not found," try `pip3` instead.
+If the automatic helper install cannot finish, the plugin prints plain-English next steps. In practice that usually means one of three things: Python itself is missing, the machine cannot reach PyPI on first run, or the host app cannot write to `Documents/Lesson Plan Magic/`.
 
 ### Step 4 — Add your school calendar (optional, highly recommended)
 
-Export an `.ics` file from Google Calendar or Outlook, or use a PDF from your district website. You can upload it during the first-run setup conversation, or any time later by saying `Update my config.`
+Export an `.ics` file from Google Calendar or Outlook, or upload a PDF with selectable text from your district website. Upload it during setup, or later by saying `Update my config.` Once loaded, the plugin can skip breaks and account for testing days or half-days when sequencing plans. Scanned-image PDFs usually won't parse reliably.
 
 ### Step 5 — Start your first planning session
 
@@ -183,11 +184,8 @@ Use this if you're already running Claude Code or your IT department has set it 
 1. Download `jakes-lesson-plan-magic.plugin` from [Releases](https://github.com/revjake1/lesson-plan-magic/releases).
 2. Open Claude Code and go to **Settings → Plugins**.
 3. Click **Install from file** and select the `.plugin` file. Enable it from the plugin list.
-4. Install Python tools — same command as the Cowork path:
-   ```
-   pip install python-docx python-pptx pypdf requests beautifulsoup4 rapidfuzz pyyaml defusedxml
-   ```
-5. You can trigger the plugin with the `/lesson-planner` or `/classroom-artifacts` slash commands, or just talk in plain English — `Plan my week for Chemistry` — and the plugin recognizes planning requests automatically.
+4. Make sure Python 3.9+ is installed. The plugin installs its own helper libraries automatically on first use.
+5. Just talk in plain English — `Plan my week for Chemistry` — the plugin recognizes planning requests automatically. No slash command needed.
 
 ---
 
@@ -205,7 +203,7 @@ The first time you trigger the lesson planner, it starts a guided conversation. 
 | 3 | Your subjects / preps | One entry per prep. Elementary teachers: enter one "subject" (e.g., "3rd Grade") with content areas (math, reading, science, etc.) inside it. |
 | 4 | Per-subject setup | Standards source, district template, schedule type, instructional framework(s), and differentiation populations — collected in one message per subject, not nine separate questions. |
 | 5 | Past plans _(optional)_ | Drop a folder of old `.docx` plans. The plugin reads them to learn your voice, density, and activity preferences. Even 5–10 old plans make a significant difference. |
-| 6 | School calendar _(optional)_ | Upload an `.ics` or PDF calendar. Holidays and test days are skipped automatically from that point forward. |
+| 6 | School calendar _(optional)_ | Upload an `.ics` calendar or a PDF with selectable text. Holidays, test days, and half-days are skipped automatically from that point forward. |
 
 At the end, the plugin writes a `config.yaml` file to `Documents/Lesson Plan Magic/` and gives you a plain-English summary of everything it learned.
 
@@ -282,7 +280,7 @@ All files go to one folder:
 | Mac / Linux | `~/Documents/Lesson Plan Magic/outputs/` |
 | Windows | `%USERPROFILE%\Documents\Lesson Plan Magic\outputs\` |
 
-Files are named by date and subject:
+Typical filenames are date/subject based. The exact stem for daily vs. unit plans can vary by scope:
 
 ```
 2026-04-21_to_2026-04-25_chem.docx          ← weekly lesson plan
@@ -298,6 +296,10 @@ unit_2026-04-21_to_2026-05-08_amer-lit.docx  ← unit plan
 Every lesson plan also writes a **`.plan.md` sidecar file** alongside the `.docx`. The classroom-artifacts skill reads this sidecar to pull learning intentions, activities, and standards without opening the Word document.
 
 Double-click any `.docx` to open in Word or Google Docs. Double-click any `.pptx` for PowerPoint or Google Slides.
+
+For lesson plans, the plugin also saves a `.plan.md` sidecar next to the `.docx`; that sidecar is what the classroom-artifacts skill reuses later. The helper scripts refuse to write outside `Documents/Lesson Plan Magic/outputs/` unless you explicitly override that fence.
+
+Current limits in `v0.3.0`: no PDF export, no native Google Forms creation, and no direct LMS posting. Exit tickets can produce Google Forms-ready `.txt`, but the actual form or LMS post is still manual.
 
 ---
 
@@ -645,4 +647,4 @@ For complete documentation including worked examples, framework walkthroughs, co
 
 MIT — see [LICENSE](LICENSE).
 
-*Jake's Lesson Plan Magic · v0.2.5*
+*Jake's Lesson Plan Magic · v0.3.0 · [jakehallman.com](https://jakehallman.com)*

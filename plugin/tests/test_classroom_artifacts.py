@@ -20,6 +20,7 @@ from docx import Document
 from pptx import Presentation
 from pptx.enum.shapes import MSO_SHAPE_TYPE
 
+import artifact_common
 import content_schema
 import pii_scan
 import generate_agenda_slide
@@ -110,6 +111,71 @@ class TestLoadPlanMd:
         p.write_text("not used")
         with pytest.raises(ValueError):
             pii_scan.load_plan_md(p)
+
+
+class TestStructuredPlanLoading:
+    def test_prefers_json_sidecar_for_docx_plan(self, tmp_path):
+        docx_path = tmp_path / "plan.docx"
+        Document().save(str(docx_path))
+        markdown = SAMPLE_PLAN_MD.replace("2026-04-22", "2026-4-22")
+        (tmp_path / "plan.plan.md").write_text(markdown)
+        (tmp_path / "plan.plan.json").write_text(
+            json.dumps(
+                {
+                    "v": 1,
+                    "s": "JSON Chemistry",
+                    "t": "Mr. Hallman",
+                    "d": [
+                        {
+                            "dt": "2026-04-22",
+                            "n": "Wednesday",
+                            "li": "JSON learning intention.",
+                            "sc": ["JSON criterion"],
+                            "ag": ["JSON agenda"],
+                            "m": ["JSON worksheet"],
+                            "do": "JSON do now.",
+                        }
+                    ],
+                }
+            ),
+            encoding="utf-8",
+        )
+
+        day = artifact_common.load_structured_day(
+            docx_path, "2026-04-22", plan_md=markdown
+        )
+
+        assert day is not None
+        assert day["subject"] == "JSON Chemistry"
+        assert day["learning_intention"] == "JSON learning intention."
+        assert day["agenda"] == ["JSON agenda"]
+
+    def test_stale_json_sidecar_falls_back_to_markdown(self, tmp_path):
+        plan = tmp_path / "plan.md"
+        plan.write_text(SAMPLE_PLAN_MD, encoding="utf-8")
+        json_sidecar = tmp_path / "plan.json"
+        json_sidecar.write_text(
+            json.dumps(
+                {
+                    "v": 1,
+                    "s": "Stale JSON Subject",
+                    "d": [{"dt": "2026-04-22", "li": "Stale JSON LI"}],
+                }
+            ),
+            encoding="utf-8",
+        )
+        stale_ns = plan.stat().st_mtime_ns + 1_000_000
+        os.utime(plan, ns=(stale_ns, stale_ns))
+
+        day = artifact_common.load_structured_day(
+            plan, "2026-04-22", plan_md=SAMPLE_PLAN_MD
+        )
+
+        assert day is not None
+        assert day["subject"] == "Chemistry"
+        assert day["learning_intention"] == (
+            "I can apply Newton's second law to everyday motion."
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -376,6 +442,51 @@ class TestAgendaSlide:
         assert result.returncode != 0
         assert "unresolved template placeholders" in result.stderr.lower()
         assert not out.exists()
+
+    @pytest.mark.parametrize(
+        ("runner", "out_name"),
+        [
+            (_run_agenda, "agenda.pptx"),
+            (_run_exit, "exit.docx"),
+            (_run_do_now, "do-now.docx"),
+            (_run_sub, "sub-plan.docx"),
+        ],
+    )
+    def test_helpers_prefer_json_sidecar_when_markdown_parse_would_fail(
+        self, runner, out_name, tmp_path
+    ):
+        plan = tmp_path / "plan.md"
+        plan.write_text(
+            SAMPLE_PLAN_MD.replace("2026-04-22", "2026-4-22"),
+            encoding="utf-8",
+        )
+        plan.with_suffix(".json").write_text(
+            json.dumps(
+                {
+                    "v": 1,
+                    "s": "Chemistry",
+                    "t": "Mr. Hallman",
+                    "d": [
+                        {
+                            "dt": "2026-04-22",
+                            "n": "Wednesday",
+                            "li": "JSON learning intention.",
+                            "sc": ["JSON criterion"],
+                            "ag": ["JSON agenda"],
+                            "m": ["JSON worksheet"],
+                            "do": "JSON do now.",
+                        }
+                    ],
+                }
+            ),
+            encoding="utf-8",
+        )
+        out = tmp_path / out_name
+
+        result = runner(plan, out)
+
+        assert result.returncode == 0, result.stderr
+        assert out.exists()
 
 
 # ---------------------------------------------------------------------------

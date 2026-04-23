@@ -1,5 +1,6 @@
 """Pytest regression tests for fill_template.py PII scanner fixes."""
 
+import json
 import os
 import subprocess
 import sys
@@ -287,6 +288,24 @@ class TestScanForPiiAllowlisting:
         # Should not flag "Review Monday"
         assert not any("Review Monday" in match[0] for match in matches)
 
+    def test_single_name_in_sensitive_teacher_note_is_flagged(self):
+        """Single-name student notes should not slip through."""
+        text = "Today Maria will get extended time."
+        matches = scan_for_pii(text, allowed_names=set())
+        assert any(match[0] == "Maria" for match in matches)
+        assert any("single-name" in label for _, label in matches)
+
+    def test_single_name_with_missing_work_context_is_flagged(self):
+        text = "Review Jamal about missing work."
+        matches = scan_for_pii(text, allowed_names=set())
+        assert any(match[0] == "Jamal" for match in matches)
+        assert any("single-name" in label for _, label in matches)
+
+    def test_single_name_context_respects_allowlist(self):
+        text = "Today Jane will get extended time."
+        matches = scan_for_pii(text, allowed_names={"Jane Smith"})
+        assert not any(match[0] == "Jane" for match in matches)
+
     def test_default_allowed_names_not_flagged(self):
         """Historical figures in DEFAULT_ALLOWED_NAMES are not flagged."""
         text = "Students studied Rosa Parks and Abraham Lincoln."
@@ -553,6 +572,31 @@ class TestFillTemplateCliRegressions:
         assert not out.exists()
         assert sidecar.read_text(encoding="utf-8") == "stale content"
 
+    def test_existing_different_json_sidecar_blocks_before_output_write(self, tmp_path):
+        plan = tmp_path / "plan.md"
+        plan.write_text(SAMPLE_PLAN_MD, encoding="utf-8")
+        template = tmp_path / "template.docx"
+        doc = Document()
+        doc.add_paragraph("{{MONDAY_LEARNING_INTENTION}}")
+        doc.save(str(template))
+
+        out = tmp_path / "out.docx"
+        json_sidecar = out.with_suffix(".plan.json")
+        json_sidecar.write_text(
+            json.dumps({"v": 1, "d": [{"dt": "2026-04-21"}]}),
+            encoding="utf-8",
+        )
+
+        result = _run_fill(plan, template, out)
+
+        assert result.returncode == 5
+        assert "refusing to overwrite existing JSON sidecar" in result.stderr
+        assert not out.exists()
+        assert json.loads(json_sidecar.read_text(encoding="utf-8")) == {
+            "v": 1,
+            "d": [{"dt": "2026-04-21"}],
+        }
+
     def test_blocks_output_outside_documented_dir_without_allow_anywhere(self, tmp_path):
         home = tmp_path / "home"
         plan = tmp_path / "plan.md"
@@ -599,6 +643,7 @@ class TestFillTemplateCliRegressions:
         assert result.returncode == 0, result.stderr
         assert out.exists()
         assert out.with_suffix(".plan.md").exists()
+        assert out.with_suffix(".plan.json").exists()
 
     def test_allow_anywhere_explicitly_allows_external_output(self, tmp_path):
         home = tmp_path / "home"
@@ -620,6 +665,53 @@ class TestFillTemplateCliRegressions:
         assert result.returncode == 0, result.stderr
         assert out.exists()
         assert out.with_suffix(".plan.md").exists()
+        assert out.with_suffix(".plan.json").exists()
+
+    def test_plan_json_sidecar_is_written_with_compact_day_payload(self, tmp_path):
+        plan = tmp_path / "plan.md"
+        plan.write_text(SAMPLE_PLAN_MD, encoding="utf-8")
+        template = tmp_path / "template.docx"
+        doc = Document()
+        doc.add_paragraph("{{MONDAY_LEARNING_INTENTION}}")
+        doc.save(str(template))
+
+        out = tmp_path / "out.docx"
+        result = _run_fill(plan, template, out)
+
+        assert result.returncode == 0, result.stderr
+        sidecar = json.loads(out.with_suffix(".plan.json").read_text(encoding="utf-8"))
+        assert sidecar["v"] == ft.PLAN_SIDECAR_VERSION
+        assert sidecar["w"] == "2026-04-20"
+        assert sidecar["s"] == "Chemistry"
+        assert sidecar["t"] == "Jane Smith"
+        assert sidecar["d"] == [
+            {
+                "ag": ["Warm-up", "Practice"],
+                "dt": "2026-04-20",
+                "e": "Exit ticket",
+                "li": "I can describe Newton's second law.",
+                "m": ["Whiteboard"],
+                "n": "Monday",
+                "sc": ["I can identify force and mass."],
+                "st": ["HS-PS1-1"],
+            }
+        ]
+
+    def test_no_sidecar_skips_markdown_and_json_sidecars(self, tmp_path):
+        plan = tmp_path / "plan.md"
+        plan.write_text(SAMPLE_PLAN_MD, encoding="utf-8")
+        template = tmp_path / "template.docx"
+        doc = Document()
+        doc.add_paragraph("{{MONDAY_LEARNING_INTENTION}}")
+        doc.save(str(template))
+
+        out = tmp_path / "out.docx"
+        result = _run_fill(plan, template, out, no_sidecar=True)
+
+        assert result.returncode == 0, result.stderr
+        assert out.exists()
+        assert not out.with_suffix(".plan.md").exists()
+        assert not out.with_suffix(".plan.json").exists()
 
     def test_plan_markdown_size_limit_blocks_output(self, tmp_path):
         plan = tmp_path / "plan.md"

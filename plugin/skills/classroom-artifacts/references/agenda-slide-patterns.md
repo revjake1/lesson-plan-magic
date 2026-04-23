@@ -1,6 +1,6 @@
 # Agenda Slide Patterns
 
-How the skill generates a daily agenda slide (.pptx or Google Slide) from
+How the skill generates a daily agenda slide (`.pptx`) from
 the day's lesson plan.
 
 ### What an agenda slide is
@@ -30,5 +30,6 @@ Maps 1:1 from the lesson plan's daily markdown sections:
 
 ### Output formats
 
-- `.pptx` via python-pptx (ships with Cowork)
-- Future: Google Slides via API (v0.2+)
+- `.pptx` via `python-pptx`
+- Teachers can open the generated `.pptx` in Google Slides or PowerPoint
+- Future release: native Google Slides API output

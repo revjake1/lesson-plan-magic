@@ -1,28 +1,22 @@
 PLUGIN_DIR := plugin
 DIST_DIR := dist
 PLUGIN_NAME := jakes-lesson-plan-magic.plugin
-PYTHON ?= python3
+VENV_PYTHON := $(firstword $(wildcard .venv/bin/python .venv/Scripts/python.exe))
+PYTHON ?= $(if $(VENV_PYTHON),$(VENV_PYTHON),python3)
 PYTEST ?= $(PYTHON) -m pytest
 
-.PHONY: test package clean sync-license
+.PHONY: test package smoke-package verify-release clean
 
 test:
 	$(PYTEST) $(PLUGIN_DIR)/tests
 
-sync-license:
-	cp LICENSE $(PLUGIN_DIR)/LICENSE
+package:
+	$(PYTHON) scripts/build_plugin.py --output $(DIST_DIR)/$(PLUGIN_NAME)
 
-package: sync-license
-	mkdir -p $(DIST_DIR)
-	rm -f $(DIST_DIR)/$(PLUGIN_NAME)
-	cd $(PLUGIN_DIR) && zip -qr ../$(DIST_DIR)/$(PLUGIN_NAME) . \
-		-x '.claude' '.claude/*' '.claude/**' \
-		-x '.DS_Store' '*/.DS_Store' \
-		-x '.coverage' \
-		-x '.pytest_cache' '.pytest_cache/*' '.pytest_cache/**' \
-		-x 'tests' 'tests/*' 'tests/**' \
-		-x '__pycache__' '__pycache__/*' '__pycache__/**' \
-		-x '*.pyc'
+smoke-package: package
+	$(PYTHON) scripts/smoke_packaged_plugin.py $(DIST_DIR)/$(PLUGIN_NAME)
+
+verify-release: test smoke-package
 
 clean:
 	rm -rf $(DIST_DIR)

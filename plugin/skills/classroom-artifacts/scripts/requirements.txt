@@ -1,5 +1,6 @@
-# Runtime dependencies for the classroom-artifacts scripts.
-# This skill is installable without the lesson-planner scripts.
+# Direct runtime dependencies for the classroom-artifacts scripts.
+# The packaged plugin auto-installs pinned versions from
+# ../../shared/runtime-requirements.lock.txt on first use.
 
 python-docx>=1.1.0
 python-pptx>=0.6.23

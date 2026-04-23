@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
 Ingest teacher's past .docx lesson plans and extract voice profile dimensions.
-Outputs human-editable voice-profile.md (and optional .json sidecar) for use by lesson-planner skill.
+Outputs human-editable voice-profile.md and a dense voice-profile.json sidecar
+for use by the lesson-planner skill.
 """
 
 from __future__ import annotations
@@ -10,12 +11,25 @@ import argparse
 import json
 import logging
 import re
+import sys
 import zipfile
 from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 from statistics import median
 from typing import Dict, List, Tuple
+
+_SHARED_DIR = Path(__file__).resolve().parents[3] / "shared"
+if str(_SHARED_DIR) not in sys.path:
+    sys.path.insert(0, str(_SHARED_DIR))
+
+try:
+    from runtime_bootstrap import ensure_plugin_runtime_or_exit
+except ImportError:  # pragma: no cover - exercised by isolated script tests
+    ensure_plugin_runtime_or_exit = None
+
+if ensure_plugin_runtime_or_exit is not None:
+    ensure_plugin_runtime_or_exit(__file__)
 
 from defusedxml import ElementTree as ET
 from docx import Document
@@ -592,7 +606,19 @@ def main():
     parser.add_argument("--min-plans", type=int, default=3, help="Warn if fewer plans found (default: 3)")
     parser.add_argument("--redact-names", action="store_true", default=True, help="Redact student names (default: True)")
     parser.add_argument("--no-redact-names", dest="redact_names", action="store_false", help="Skip name redaction")
-    parser.add_argument("--json-sidecar", action="store_true", help="Also write voice-profile.json")
+    parser.set_defaults(json_sidecar=True)
+    parser.add_argument(
+        "--json-sidecar",
+        dest="json_sidecar",
+        action="store_true",
+        help="Write voice-profile.json (default: on).",
+    )
+    parser.add_argument(
+        "--no-json-sidecar",
+        dest="json_sidecar",
+        action="store_false",
+        help="Skip writing voice-profile.json.",
+    )
     parser.add_argument("--teacher-name", help="Teacher's name to allowlist during redaction")
 
     args = parser.parse_args()
@@ -672,7 +698,8 @@ def main():
         sidecar = {k: v for k, v in sidecar.items() if _nz(v)}
         try:
             json_path.write_text(
-                json.dumps(sidecar, separators=(",", ":")), encoding="utf-8"
+                json.dumps(sidecar, separators=(",", ":"), sort_keys=True),
+                encoding="utf-8",
             )
             print(f"✓ JSON sidecar written to {json_path}")
         except Exception as e:

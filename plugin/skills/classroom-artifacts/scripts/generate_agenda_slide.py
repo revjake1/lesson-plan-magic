@@ -22,6 +22,18 @@ import json
 import sys
 from pathlib import Path
 
+_SHARED_DIR = Path(__file__).resolve().parents[3] / "shared"
+if str(_SHARED_DIR) not in sys.path:
+    sys.path.insert(0, str(_SHARED_DIR))
+
+try:
+    from runtime_bootstrap import ensure_plugin_runtime_or_exit
+except ImportError:  # pragma: no cover - exercised by isolated script tests
+    ensure_plugin_runtime_or_exit = None
+
+if ensure_plugin_runtime_or_exit is not None:
+    ensure_plugin_runtime_or_exit(__file__)
+
 from pptx import Presentation
 from pptx.util import Inches, Pt, Emu
 from pptx.enum.text import PP_ALIGN
@@ -30,7 +42,7 @@ from pptx.dml.color import RGBColor
 _HERE = Path(__file__).resolve().parent
 if str(_HERE) not in sys.path:
     sys.path.insert(0, str(_HERE))
-from artifact_common import load_config, resolve_output_path
+from artifact_common import load_config, load_structured_day, resolve_output_path
 # Hard dependency: pii_scan carries the PII checks and the plan
 # loader. A broken/incomplete install must abort loudly, not fall back to
 # no-op stubs that would persist student names to disk.
@@ -47,35 +59,34 @@ from content_schema import (
     load_and_validate_content,
     validate_agenda_content,
 )
-from plan_parser import parse_plan
 
 
 # ---------------------------------------------------------------------------
 # Markdown → day fields
 # ---------------------------------------------------------------------------
 
-def extract_day_fields(md: str, target_date: str) -> dict | None:
-    """Pull the target date's sections from a weekly markdown plan.
+def extract_day_fields(
+    plan_path: Path, target_date: str, *, plan_md: str
+) -> dict | None:
+    """Pull the target date's sections from structured plan data.
 
     Returns dict with keys: date, day_name, learning_intention,
     success_criteria (list), agenda (list), do_now, materials (list).
     Returns None if the target date isn't found in the plan.
     """
-    week = parse_plan(md)
-    for day in week.days:
-        if day.date != target_date:
-            continue
-        return {
-            "date": day.date,
-            "day_name": day.day_name,
-            "learning_intention": day.learning_intention,
-            "success_criteria": list(day.success_criteria),
-            "agenda": list(day.agenda),
-            "do_now": day.do_now,
-            "materials": list(day.materials),
-            "subject": week.subject,
-        }
-    return None
+    day = load_structured_day(plan_path, target_date, plan_md=plan_md)
+    if day is None:
+        return None
+    return {
+        "date": day["date"],
+        "day_name": day["day_name"],
+        "learning_intention": day["learning_intention"],
+        "success_criteria": list(day["success_criteria"]),
+        "agenda": list(day["agenda"]),
+        "do_now": day["do_now"],
+        "materials": list(day["materials"]),
+        "subject": day["subject"],
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -257,7 +268,7 @@ def main() -> int:
         return 1
 
     try:
-        fields = extract_day_fields(md, args.date)
+        fields = extract_day_fields(plan_path, args.date, plan_md=md)
     except ValueError as e:
         print(f"Error: {e}", file=sys.stderr)
         return 1

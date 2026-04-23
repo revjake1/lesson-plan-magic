@@ -19,11 +19,23 @@ import os
 import subprocess
 import time
 from datetime import datetime, timedelta, timezone
+from difflib import SequenceMatcher
 from pathlib import Path
 from urllib.parse import urlparse
 
+_SHARED_DIR = Path(__file__).resolve().parents[3] / "shared"
+if str(_SHARED_DIR) not in sys.path:
+    sys.path.insert(0, str(_SHARED_DIR))
+
+try:
+    from runtime_bootstrap import ensure_plugin_runtime_or_exit
+except ImportError:  # pragma: no cover - exercised by isolated script tests
+    ensure_plugin_runtime_or_exit = None
+
+if ensure_plugin_runtime_or_exit is not None:
+    ensure_plugin_runtime_or_exit(__file__)
+
 from bs4 import BeautifulSoup
-from rapidfuzz.fuzz import token_set_ratio
 
 import safe_http
 
@@ -214,6 +226,30 @@ def _content_token_recall(claimed: str, actual: str) -> float:
     actual_tokens = set(re.findall(r"[a-z0-9]+", actual.lower()))
     present = sum(1 for t in claimed_tokens if t in actual_tokens)
     return present / len(claimed_tokens)
+
+
+def token_set_ratio(claimed: str, actual: str) -> float:
+    """Approximate RapidFuzz's token-set ratio on a 0-100 scale."""
+    claimed_tokens = set(re.findall(r"[a-z0-9]+", claimed.lower()))
+    actual_tokens = set(re.findall(r"[a-z0-9]+", actual.lower()))
+    if not claimed_tokens and not actual_tokens:
+        return 100.0
+    if not claimed_tokens or not actual_tokens:
+        return 0.0
+
+    shared_tokens = claimed_tokens & actual_tokens
+    shared = " ".join(sorted(shared_tokens))
+    claimed_combined = " ".join(sorted(shared_tokens | (claimed_tokens - actual_tokens)))
+    actual_combined = " ".join(sorted(shared_tokens | (actual_tokens - claimed_tokens)))
+
+    def _ratio(left: str, right: str) -> float:
+        return SequenceMatcher(None, left, right).ratio() * 100.0
+
+    candidates = [_ratio(claimed_combined, actual_combined)]
+    if shared:
+        candidates.append(_ratio(shared, claimed_combined))
+        candidates.append(_ratio(shared, actual_combined))
+    return max(candidates)
 
 
 def fuzzy_title_match(claimed: str, actual: str) -> float:

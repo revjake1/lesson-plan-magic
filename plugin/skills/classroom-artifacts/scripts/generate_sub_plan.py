@@ -45,6 +45,18 @@ import sys
 from pathlib import Path
 from typing import Optional, Any
 
+_SHARED_DIR = Path(__file__).resolve().parents[3] / "shared"
+if str(_SHARED_DIR) not in sys.path:
+    sys.path.insert(0, str(_SHARED_DIR))
+
+try:
+    from runtime_bootstrap import ensure_plugin_runtime_or_exit
+except ImportError:  # pragma: no cover - exercised by isolated script tests
+    ensure_plugin_runtime_or_exit = None
+
+if ensure_plugin_runtime_or_exit is not None:
+    ensure_plugin_runtime_or_exit(__file__)
+
 from docx import Document
 from docx.shared import Pt
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
@@ -52,7 +64,7 @@ from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 _HERE = Path(__file__).resolve().parent
 if str(_HERE) not in sys.path:
     sys.path.insert(0, str(_HERE))
-from artifact_common import load_config, resolve_output_path
+from artifact_common import load_config, load_structured_day, resolve_output_path
 # Hard dependency: pii_scan carries the PII checks and the plan
 # loader. A broken/incomplete install must abort loudly, not fall back to
 # no-op stubs that would persist student names to disk.
@@ -69,24 +81,23 @@ from content_schema import (
     load_and_validate_content,
     validate_sub_plan_content,
 )
-from plan_parser import parse_plan
 
 
-def extract_day_fields(md: str, target_date: str) -> Optional[dict]:
-    """Pull the target date's sections from a weekly markdown plan."""
-    week = parse_plan(md)
-    for day in week.days:
-        if day.date != target_date:
-            continue
-        return {
-            "date": day.date,
-            "day_name": day.day_name,
-            "learning_intention": day.learning_intention,
-            "agenda": list(day.agenda),
-            "materials": list(day.materials),
-            "subject": week.subject,
-        }
-    return None
+def extract_day_fields(
+    plan_path: Path, target_date: str, *, plan_md: str
+) -> Optional[dict]:
+    """Pull the target date's sections from structured plan data."""
+    day = load_structured_day(plan_path, target_date, plan_md=plan_md)
+    if day is None:
+        return None
+    return {
+        "date": day["date"],
+        "day_name": day["day_name"],
+        "learning_intention": day["learning_intention"],
+        "agenda": list(day["agenda"]),
+        "materials": list(day["materials"]),
+        "subject": day["subject"],
+    }
 
 
 def _activity_lines(fields: dict, content: dict) -> list[str]:
@@ -275,7 +286,7 @@ def _build_from_template(fields: dict, content: dict, template_path: Path,
 
 def main() -> int:
     ap = argparse.ArgumentParser(description="Generate sub plan from lesson plan.")
-    ap.add_argument("--plan", required=True, help="Path to markdown lesson plan")
+    ap.add_argument("--plan", required=True, help="Path to markdown or .docx lesson plan")
     ap.add_argument("--date", required=True, help="Target date (YYYY-MM-DD)")
     ap.add_argument("--subject", help="Subject id (for display)")
     ap.add_argument("--output", required=True, help="Output .docx path")
@@ -303,7 +314,7 @@ def main() -> int:
         return 1
 
     try:
-        fields = extract_day_fields(md, args.date)
+        fields = extract_day_fields(plan_path, args.date, plan_md=md)
     except ValueError as e:
         print(f"Error: {e}", file=sys.stderr)
         return 1

@@ -636,7 +636,7 @@
 
 <!-- ─── HERO ──────────────────────────────────────────── -->
 <section class="hero">
-  <div class="hero-badge">v0.2.5 · Free · Open source</div>
+  <div class="hero-badge">v0.3.0 · Free · Open source</div>
   <h1>Your AI planning partner —<br><em>built for teachers</em>, not tech people.</h1>
   <p class="hero-sub">
     Tell it what you're teaching. Get a finished Word document in your district's template,
@@ -671,7 +671,7 @@
       <h3>Classroom Artifacts</h3>
       <p class="skill-desc">All the short, printable things you need every day — pulled from your plan automatically.</p>
       <ul class="skill-bullets">
-        <li>Agenda slides as PowerPoint — one per subject, learning intention and schedule pre-filled</li>
+        <li>Agenda slides as PowerPoint — one file per requested subject/day, learning intention and schedule pre-filled</li>
         <li>Exit tickets as a Word half-sheet or Google Forms–ready text</li>
         <li>Do-nows and bell ringers — students can start independently</li>
         <li>Sub plans — one page, any adult can run it</li>
@@ -704,7 +704,7 @@
           </li>
           <li>
             <span class="pf-icon">✓</span>
-            Upload an exported <code>.ics</code> or PDF calendar so holidays skip automatically
+            Upload an exported <code>.ics</code> or selectable-text PDF calendar so holidays skip automatically
           </li>
           <li>
             <span class="pf-icon">✓</span>
@@ -731,7 +731,7 @@
           </li>
           <li>
             <span class="pf-icon">✓</span>
-            Upload <code>.ics</code> calendar file manually
+            Upload <code>.ics</code> or selectable-text PDF calendar file manually
           </li>
           <li>
             <span class="pf-icon">✓</span>
@@ -770,17 +770,17 @@
       <div class="step">
         <div class="step-num">3</div>
         <div class="step-body">
-          <h3>Install Python tools (one-time)</h3>
-          <p>Open Terminal (Mac) or Command Prompt (Windows) and paste:</p>
-          <div class="cmd-block">pip install python-docx python-pptx pypdf requests beautifulsoup4 rapidfuzz pyyaml defusedxml</div>
-          <p style="margin-top:8px">If you see "pip not found," try <code>pip3</code> instead.</p>
+          <h3>Make sure Python is installed</h3>
+          <p>Lesson Plan Magic needs <code>Python 3.9+</code>, but it now installs its own pinned helper packages automatically on first use. No manual <code>pip install</code> step is required for normal setup.</p>
+          <p style="margin-top:8px">That first helper install may take a minute or two and needs normal internet access.</p>
+          <p style="margin-top:8px">If that automatic install fails, the plugin shows plain-English next steps instead of a developer traceback.</p>
         </div>
       </div>
       <div class="step">
         <div class="step-num">4</div>
         <div class="step-body">
           <h3>Add your school calendar <span style="color:var(--muted);font-weight:400;font-size:14px">(optional but great)</span></h3>
-          <p>Export an <code>.ics</code> file from Google Calendar or Outlook, or use a PDF from your district website. Upload it during setup, or later with <code>Update my config</code>. Once loaded, the plugin skips holidays, half-days, and testing windows automatically.</p>
+          <p>Export an <code>.ics</code> file from Google Calendar or Outlook, or upload a PDF with selectable text from your district website. Upload it during setup, or later with <code>Update my config</code>. Once loaded, the plugin can skip breaks and account for half-days or testing windows when sequencing plans. Scanned-image PDFs usually will not parse reliably.</p>
         </div>
       </div>
       <div class="step">
@@ -830,7 +830,7 @@
       <div class="artifact-card">
         <div class="artifact-icon" style="background:#f3e8f6;">📅</div>
         <h3>School calendar (optional)</h3>
-        <p>Upload an <code>.ics</code> or PDF, or connect your calendar in Cowork. Holidays and testing windows skip automatically.</p>
+        <p>Upload an <code>.ics</code> calendar file or a PDF with selectable text. Holidays and testing windows skip automatically.</p>
       </div>
     </div>
   </div>
@@ -917,7 +917,7 @@
         <div class="artifact-icon" style="background:#e0f4f6;">📊</div>
         <h3>Agenda Slide</h3>
         <div class="cmd">/classroom-artifacts Agenda slide for today.</div>
-        <p>One slide per subject. Learning intention, success criteria, 3–6 agenda bullets, and tomorrow's materials — all pre-filled.</p>
+        <p>One slide for the requested subject/day. If you ask for multiple subjects, it generates one `.pptx` per subject.</p>
         <div class="output-tag">Output: .pptx</div>
       </div>
       <div class="artifact-card">
@@ -1089,7 +1089,7 @@
 
 <!-- ─── FOOTER ────────────────────────────────────────── -->
 <footer>
-  <p>Jake's Lesson Plan Magic · v0.2.5 · MIT License · <a href="https://jakehallman.com">jakehallman.com</a></p>
+  <p>Jake's Lesson Plan Magic · v0.3.0 · MIT License · <a href="https://jakehallman.com">jakehallman.com</a></p>
 </footer>
 
 </body>

@@ -1,6 +1,6 @@
 # Jake's Lesson Plan Magic — Complete Teacher Guide
 
-> **Version 0.2.5 · For K-12 teachers · No tech experience required**
+> **Version 0.3.0 · For K-12 teachers · No tech experience required**
 
 ---
 
@@ -84,8 +84,8 @@ You have two options for running Lesson Plan Magic. **Cowork is the recommended 
 | **Best for** | Most teachers | Teachers comfortable with a developer tool |
 | **Installation** | Drag-and-drop the `.plugin` file | File drop + one Terminal command |
 | **How you trigger skills** | Type `/lesson-planner` or `/classroom-artifacts` | Just talk — plain English |
-| **Connect your calendar** | Upload an `.ics` or PDF school calendar | Upload an `.ics` or PDF school calendar |
-| **Connect your email** | Not in the shipped v0.2.5 plugin | Not available |
+| **Connect your calendar** | Upload an `.ics` or selectable-text PDF school calendar | Upload an `.ics` or selectable-text PDF school calendar |
+| **Connect your email** | Not in the shipped v0.3.0 plugin | Not available |
 | **Output files** | Same `Documents/Lesson Plan Magic/outputs/` folder | Same folder |
 | **Python required** | Yes (one-time setup) | Yes (one-time setup) |
 
@@ -106,7 +106,7 @@ Both produce identical plans and artifacts. The difference is entirely in how yo
 - **Your district lesson plan template** — the `.docx` Word file your school requires you to fill out each week. If you don't have it digitally, ask your instructional coach or department chair.
 - **Your state standards** — a PDF, a URL to your state's standards page, or even pasted text. (If you don't have this, the plugin will still work — it just won't be able to cite standard codes.)
 - **A folder of past lesson plans** — even 5 or 10 old plans in Word format. The plugin reads these to learn how you write — your density, your warmth, your favorite activities — and applies that voice to everything it generates. The more you give it, the better the match.
-- **Your school calendar** — an `.ics` file exported from Google Calendar or Outlook, or a PDF. This lets the plugin skip holidays and testing windows automatically.
+- **Your school calendar** — an `.ics` file exported from Google Calendar or Outlook, or a PDF with selectable text from your district website. This lets the plugin skip holidays and testing windows automatically.
 
 ---
 
@@ -125,35 +125,17 @@ Cowork is a free desktop app. Download it from [claude.ai/cowork](https://claude
 
 That's it for the plugin itself. You'll see two new skills available: **lesson-planner** and **classroom-artifacts**.
 
-### Step 3 — Install Python dependencies
+### Step 3 — Make sure Python is installed
 
-This is a one-time step. It gives the plugin the tools it needs to read and write Word documents, check websites, and scan for student privacy.
+This plugin still needs **Python 3.9 or newer** on your computer, but you no longer have to open Terminal and install helper packages yourself.
 
-**On Mac:**
+On first use, Lesson Plan Magic installs its own pinned Python helpers automatically into your Lesson Plan Magic folder. That first helper install may take a minute or two and needs normal internet access.
 
-1. Open the **Terminal** app (search for it in Spotlight with ⌘ Space).
-2. Copy and paste this command, then press Enter:
-
-```
-pip install python-docx python-pptx pypdf requests beautifulsoup4 rapidfuzz pyyaml defusedxml
-```
-
-3. Wait for it to finish. You'll see text scroll by — that's normal.
-
-**On Windows:**
-
-1. Open **Command Prompt** (search "cmd" in the Start menu).
-2. Copy and paste this command, then press Enter:
-
-```
-pip install python-docx python-pptx pypdf requests beautifulsoup4 rapidfuzz pyyaml defusedxml
-```
-
-> **Tip:** If you see "pip not found," try `pip3` instead of `pip`.
+If that automatic install fails, the plugin now prints a plain-English checklist telling you exactly what is missing or blocked: Python itself, first-run internet access, or permission to write inside `Documents/Lesson Plan Magic/`.
 
 ### Step 4 — Add your school calendar (optional but great)
 
-Export an `.ics` file from Google Calendar or Outlook, or use a PDF from your district website. Upload it during setup, or later by saying `Update my config.` Once loaded, the plugin automatically knows about holidays, half-days, and testing windows without you retyping them.
+Export an `.ics` file from Google Calendar or Outlook, or upload a PDF with selectable text from your district website. Upload it during setup, or later by saying `Update my config.` Once loaded, the plugin can skip breaks and account for half-days or testing windows without you retyping them. Scanned-image PDFs usually won't parse reliably.
 
 ### Step 5 — Start using it
 
@@ -175,21 +157,9 @@ Use this path if you're already running Claude Code, or if your IT department ha
 4. Click **Install from file** and select `jakes-lesson-plan-magic.plugin`.
 5. Enable the plugin from the plugin list.
 
-### Step 2 — Install Python dependencies
+### Step 2 — Make sure Python is installed
 
-**On Mac:**
-
-```
-pip install python-docx python-pptx pypdf requests beautifulsoup4 rapidfuzz pyyaml defusedxml
-```
-
-**On Windows:**
-
-```
-pip install python-docx python-pptx pypdf requests beautifulsoup4 rapidfuzz pyyaml defusedxml
-```
-
-> **Tip:** If you see "pip not found," try `pip3` instead of `pip`.
+Claude Code still needs **Python 3.9 or newer**, but the plugin now installs its own helper libraries automatically on first use. No manual `pip install` step is required for normal use.
 
 ### Step 3 — Start using it
 
@@ -312,7 +282,7 @@ If you uploaded past plans in Step 5 and they already answered these questions c
 
 ### Step 7 — School calendar (optional)
 
-You can upload your school-year calendar here: an `.ics` file from Google Calendar or Outlook, or a PDF from your district's website.
+You can upload your school-year calendar here: an `.ics` file from Google Calendar or Outlook, or a PDF with selectable text from your district website.
 
 With a calendar loaded, the plugin automatically skips holidays, avoids planning on testing days, and re-sequences around half-days. Without it, mention special days when you ask for a plan ("skip Thursday — it's a half day").
 
@@ -561,7 +531,7 @@ Agenda slides for all my subjects today.
 Agenda slide for Thursday's AP Chemistry.
 ```
 
-**What you get:** A `.pptx` PowerPoint file with one slide per subject. Each slide includes:
+**What you get:** A `.pptx` PowerPoint file with one slide for the requested subject/day. If you ask for multiple subjects, the plugin generates one `.pptx` per subject. Each slide includes:
 - Learning intention ("I am learning…")
 - Success criteria ("I can…")
 - Today's agenda (3–6 bullets, in order)
@@ -988,7 +958,7 @@ In Cowork, type `/` to see all available skills at any time.
 | Upload new template | `I have a new district template to upload.` |
 | Upload new standards | `Upload new standards for [subject].` |
 | Approve a name | `Add "[name]" to my approved names list.` |
-| Add school calendar | Upload an `.ics` or PDF during onboarding, or say `Update my config.` |
+| Add school calendar | Upload an `.ics` file or selectable-text PDF during onboarding, or say `Update my config.` |
 
 ### Output file location
 
@@ -1007,4 +977,4 @@ File naming: `YYYY-MM-DD_subjectid_type.ext`
 
 ---
 
-*Jake's Lesson Plan Magic · v0.2.5 · MIT License*
+*Jake's Lesson Plan Magic · v0.3.0 · MIT License · jakehallman.com*

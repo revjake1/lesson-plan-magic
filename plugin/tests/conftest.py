@@ -7,6 +7,7 @@ tests_dir = Path(__file__).parent
 root_dir = tests_dir.parent
 
 for relative in (
+    ("shared",),
     ("skills", "lesson-planner", "scripts"),
     ("skills", "classroom-artifacts", "scripts"),
 ):
