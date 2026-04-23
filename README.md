@@ -14,7 +14,7 @@
 
 <br>
 
-[**Install (Cowork)**](#installation--cowork-recommended) · [**Install (Claude Code)**](#installation--claude-code) · [**Usage Examples**](#using-it) · [**Teacher Guide**](TEACHER_GUIDE.md) · [**FAQ**](#faq)
+[**Install (Cowork)**](#installation--cowork-recommended) · [**Install (Claude Code)**](#installation--claude-code) · [**First-Time Setup**](#first-time-setup) · [**Usage**](#usage) · [**Config Reference**](#configuration-reference) · [**Teacher Guide**](TEACHER_GUIDE.md) · [**FAQ**](#faq)
 
 </div>
 
@@ -28,10 +28,33 @@ The plugin has **two skills** that talk to each other:
 
 | Skill | Trigger | What you get |
 |---|---|---|
-| **Lesson Planner** | `/lesson-planner` | A filled-in `.docx` lesson plan in your district's template — with real standard codes, learning intentions, differentiation, and verified resource links |
+| **Lesson Planner** | `/lesson-planner` (or plain English in Claude Code) | A filled-in `.docx` lesson plan in your district's template — with real standard codes, learning intentions, differentiation, and verified resource links |
 | **Classroom Artifacts** | `/classroom-artifacts` | Agenda slides, exit tickets, do-nows, and sub plans — built from the lesson plan you just generated, or from the saved plan for that day |
 
-Both write files to `Documents/Lesson Plan Magic/outputs/` by default. Generated files stay on your computer unless you choose to share them.
+Both skills write files to `Documents/Lesson Plan Magic/outputs/`. Generated files stay on your computer unless you choose to share them.
+
+---
+
+## Table of Contents
+
+- [What's in a lesson plan](#whats-in-a-lesson-plan)
+- [Classroom artifacts](#classroom-artifacts)
+- [Supported instructional frameworks](#supported-instructional-frameworks)
+- [Differentiation populations](#differentiation-populations)
+- [Before you start](#before-you-start)
+- [Installation — Cowork](#installation--cowork-recommended)
+- [Installation — Claude Code](#installation--claude-code)
+- [First-time setup](#first-time-setup)
+- [Usage](#usage)
+- [Output files](#output-files)
+- [Configuration reference](#configuration-reference)
+- [Standards integration](#standards-integration)
+- [Voice matching](#voice-matching)
+- [Privacy & compliance](#privacy--compliance)
+- [Troubleshooting](#troubleshooting)
+- [FAQ](#faq)
+- [Full teacher guide](#full-teacher-guide)
+- [License](#license)
 
 ---
 
@@ -39,25 +62,65 @@ Both write files to `Documents/Lesson Plan Magic/outputs/` by default. Generated
 
 Every plan includes:
 
-- **Standards** — real codes pulled from your uploaded state standards, never fabricated
-- **Learning intentions and success criteria** — "I am learning… / I can…" on every day
-- **Instructional framework** — 5E, gradual release, workshop model, SWIRL, SIOP, UDL, direct instruction, PBL, or your district's custom framework
-- **Differentiation** — ELL, IEP/504, gifted, and tiered readiness, written at the accommodation level — never by student name
-- **Evidence of learning** — what to look for during instruction
-- **Verified resource links** — every link is confirmed live before it appears in your plan
+- **Standards** — real codes pulled from your uploaded state standards document or URL, never fabricated. The plugin verifies each code is in your standards source before writing it.
+- **Learning intentions and success criteria** — "I am learning… / I can…" on every day, calibrated to your grade level and subject.
+- **Instructional framework breakdown** — every activity is labeled with the framework phase it belongs to (e.g., Explore, We Do, Input, Mini-lesson). Supports 10+ frameworks; see [Supported Instructional Frameworks](#supported-instructional-frameworks).
+- **Differentiation** — ELL, IEP/504, gifted, and tiered readiness, always at the accommodation level — never by student name. FERPA-safe by design.
+- **Evidence of learning** — specific look-fors and checkpoints the teacher can use during instruction.
+- **Materials list** — automatically derived from the planned activities.
+- **Verified resource links** — every link is confirmed live and relevant before it appears in your plan. Unverified resources are described in plain English, never written as a fake hyperlink.
 
-Plans come out as filled `.docx` files in your district's template. Open them in Word or Google Docs.
+Plans come out as filled `.docx` files in your district's template. Open in Word or upload to Google Docs.
 
 ---
 
-## What classroom artifacts look like
+## Classroom artifacts
 
-| Artifact | Example request | Output |
+The `/classroom-artifacts` skill pulls content from your saved lesson plan for that day — you never have to retype a learning intention or activity.
+
+| Artifact | Example request | Output format |
 |---|---|---|
-| **Agenda slide** | `Agenda slide for today.` | `.pptx` — learning intention, success criteria, and agenda bullets, one slide per subject |
-| **Exit ticket** | `Exit ticket for Chemistry.` | `.docx` half-sheet or Google Forms-ready `.txt` — 2–3 content questions, one metacognitive prompt, optional extension |
-| **Do-now / bell ringer** | `Do-now for tomorrow.` | `.docx` — self-explanatory, students start independently, no teacher setup required |
-| **Sub plan** | `Sub plan for tomorrow — I'm out sick.` | `.docx` — attendance procedure, activity, materials, backup plan, emergency contacts |
+| **Agenda slide** | `Agenda slide for today.` | `.pptx` — one slide per subject, learning intention + success criteria + agenda bullets, ready to project |
+| **Exit ticket** | `Exit ticket for Chemistry.` | `.docx` half-sheet for printing, or `.txt` optimized for Google Forms copy-paste — 2–3 content questions, one metacognitive prompt, optional extension |
+| **Do-now / bell ringer** | `Do-now for tomorrow.` | `.docx` — self-explanatory prompt students can start independently with no teacher setup |
+| **Sub plan** | `Sub plan for Friday — I'm out sick.` | `.docx` — attendance procedure, full activity instructions, materials, backup plan, and emergency contact section |
+
+All artifacts scan for student PII before saving. The sub plan template uses fictional sample contacts — replace them with real ones after generation.
+
+---
+
+## Supported instructional frameworks
+
+Tell the plugin which framework(s) you use during setup, and every activity in your lesson plan will be labeled with the correct phase name. Mix frameworks across subjects.
+
+| Framework | Label style in plan |
+|---|---|
+| **5E** (Engage, Explore, Explain, Elaborate, Evaluate) | `Engage:`, `Explore:`, `Explain:`, `Elaborate:`, `Evaluate:` |
+| **Gradual Release** (I Do / We Do / You Do) | `I Do:`, `We Do:`, `You Do:` |
+| **Workshop Model** | `Mini-lesson:`, `Independent Practice:`, `Share:` |
+| **SIOP** (Sheltered Instruction Observation Protocol) | `Building Background:`, `Interaction:`, `Review/Assessment:` |
+| **UDL** (Universal Design for Learning) | `Representation:`, `Action & Expression:`, `Engagement:` |
+| **Direct Instruction** | `Anticipatory Set:`, `Instruction:`, `Guided Practice:`, `Independent Practice:`, `Closure:` |
+| **Project-Based Learning (PBL)** | `Driving Question:`, `Inquiry:`, `Creation:`, `Critique & Revision:`, `Presentation:` |
+| **Hattie's Visible Learning** | `Success Criteria:`, `Direct Instruction:`, `Feedback:`, `Spaced Practice:` |
+| **Marzano** | `Setting Objectives:`, `New Knowledge:`, `Practice:`, `Hypothesis Testing:` |
+| **SWIRL** | `See:`, `Write:`, `Inquire:`, `Read:`, `Listen:` |
+| **Custom framework** | Your district's own framework — upload the guide and the plugin learns the phase names |
+
+---
+
+## Differentiation populations
+
+During setup, choose which populations to differentiate for in every plan. The plugin writes accommodation notes at the population level — never by student name.
+
+| Population tag | What appears in the plan |
+|---|---|
+| `ELL` | Language scaffolds, sentence frames, visual supports, vocabulary front-loading |
+| `IEP/504` | Extended-time notes, reduced-distraction alternatives, chunked directions, preferential seating suggestions |
+| `GIFTED` | Extension prompts, above-grade-level resources, choice boards, independent project options |
+| `TIERED_READINESS` | 2–3 readiness tiers (approaching / on-level / above) with different entry points for the same activity |
+
+You can enable any combination. If you need a population not listed, describe it during setup.
 
 ---
 
@@ -66,19 +129,19 @@ Plans come out as filled `.docx` files in your district's template. Open them in
 **Required:**
 - **Python 3.9 or newer** — on Mac, open Terminal and type `python3 --version`. On Windows, open Command Prompt and type `python --version`. If Python isn't installed, download it free at [python.org](https://python.org).
 - **A Cowork or Claude Code account** — sign up free at [claude.ai](https://claude.ai).
-- **The plugin file** — `jakes-lesson-plan-magic.plugin` (see [Releases](https://github.com/revjake1/lesson-plan-magic/releases))
+- **The plugin file** — `jakes-lesson-plan-magic.plugin` — download from [Releases](https://github.com/revjake1/lesson-plan-magic/releases).
 
 **Highly recommended (collect before setup):**
 - Your **district lesson plan template** — the `.docx` Word file your school requires. Ask your instructional coach if you don't have it.
-- Your **state standards** — a PDF, a URL to your state's standards page, or pasted text.
-- A **folder of past lesson plans** — even 5–10 old `.docx` files. The plugin reads them to learn your voice, your density, your go-to activities. The more you give it, the more it sounds like you.
-- Your **school calendar** — an `.ics` file exported from Google Calendar or Outlook, or a PDF from your district's website.
+- Your **state standards** — a PDF of your state standards document, a URL to your state's standards page, or pasted text. The plugin indexes them locally; no standards are sent anywhere.
+- A **folder of past lesson plans** — even 5–10 old `.docx` files help. The plugin reads them to learn your voice, your density, and your go-to activity types.
+- Your **school calendar** — an `.ics` file exported from Google Calendar or Outlook, or a PDF from your district's website. Lets the plugin automatically skip holidays, testing days, and half-days.
 
 ---
 
 ## Installation — Cowork (Recommended)
 
-Cowork is a free desktop app with a built-in plugin installer and a cleaner interface. It's the right choice for most teachers.
+Cowork is a free desktop app with a built-in plugin installer. It's the right choice for most teachers.
 
 ### Step 1 — Download and install Cowork
 
@@ -89,9 +152,9 @@ Get the free desktop app at [claude.ai/cowork](https://claude.ai/cowork) and ins
 1. Download `jakes-lesson-plan-magic.plugin` from [Releases](https://github.com/revjake1/lesson-plan-magic/releases).
 2. Open Cowork.
 3. Drag and drop the `.plugin` file into the Cowork window. A preview card appears.
-4. Click **Accept**. Done — two new skills appear: `/lesson-planner` and `/classroom-artifacts`.
+4. Click **Accept**. Two new skills appear: `/lesson-planner` and `/classroom-artifacts`.
 
-### Step 3 — Install Python tools (one-time)
+### Step 3 — Install Python tools (one time only)
 
 Open **Terminal** (Mac) or **Command Prompt** (Windows) and paste:
 
@@ -103,11 +166,11 @@ Wait for it to finish — text will scroll by, that's normal. If you see "pip no
 
 ### Step 4 — Add your school calendar (optional, highly recommended)
 
-Export an `.ics` file from Google Calendar or Outlook, or use a PDF from your district website. Upload it during setup, or later by saying `Update my config.` Once loaded, the plugin automatically skips holidays, testing days, and half-days.
+Export an `.ics` file from Google Calendar or Outlook, or use a PDF from your district website. You can upload it during the first-run setup conversation, or any time later by saying `Update my config.`
 
 ### Step 5 — Start your first planning session
 
-Type `/lesson-planner` in the Cowork chat. If it's your first time, the plugin walks you through a **10–20 minute setup conversation** — your name, subjects, standards, schedule, and framework. Drop files at any point. Progress saves after every step, so interruptions are fine.
+Type `/lesson-planner` in the Cowork chat. If it's your first time, the plugin walks you through a **10–20 minute setup conversation** — your name, subjects, standards, schedule, and framework. You can drop files at any point. Progress saves after every step, so interruptions are fine.
 
 > **Tip:** In Cowork, type `/` at any time to see all available skills.
 
@@ -120,37 +183,50 @@ Use this if you're already running Claude Code or your IT department has set it 
 1. Download `jakes-lesson-plan-magic.plugin` from [Releases](https://github.com/revjake1/lesson-plan-magic/releases).
 2. Open Claude Code and go to **Settings → Plugins**.
 3. Click **Install from file** and select the `.plugin` file. Enable it from the plugin list.
-4. Install Python tools — same command as above:
+4. Install Python tools — same command as the Cowork path:
    ```
    pip install python-docx python-pptx pypdf requests beautifulsoup4 rapidfuzz pyyaml defusedxml
    ```
-5. Just talk in plain English — `Plan my week for Chemistry` — the plugin recognizes planning requests automatically. No slash command needed.
+5. You can trigger the plugin with the `/lesson-planner` or `/classroom-artifacts` slash commands, or just talk in plain English — `Plan my week for Chemistry` — and the plugin recognizes planning requests automatically.
 
 ---
 
 ## First-time setup
 
-The first time you trigger the lesson planner, it starts a guided conversation. You only do this once.
+The first time you trigger the lesson planner, it starts a guided conversation. You only do this once per installation.
 
 <details>
 <summary><strong>What setup covers (click to expand)</strong></summary>
 
 | Step | What it asks | Notes |
 |---|---|---|
-| 1 | Your name, state, and school | Plain English |
-| 2 | Experience level | New (0–3 yrs), Mid-career (3–10), Veteran (10+), or Veteran-new-to-subject. Affects how much pedagogy jargon appears in your plans. |
-| 3 | Your subjects / preps | One entry per prep. Elementary teachers: one "subject" with content areas inside. |
-| 4 | Per-subject setup | Standards, district template, schedule, instructional framework, and differentiation populations — all in one message per subject, not nine separate questions. |
-| 5 | Past plans _(optional)_ | Drop a folder of old `.docx` plans. The plugin learns your voice from them. Even 5–10 makes a huge difference. |
-| 6 | School calendar _(optional)_ | Upload an `.ics` or PDF calendar. Holidays and test days skip automatically. |
+| 1 | Your name, state, and school | Plain English — no specific format required |
+| 2 | Experience level | New teacher (0–3 yrs), Mid-career (3–10), Veteran (10+), or Veteran-new-to-subject. Affects how much pedagogy jargon appears in your plans. |
+| 3 | Your subjects / preps | One entry per prep. Elementary teachers: enter one "subject" (e.g., "3rd Grade") with content areas (math, reading, science, etc.) inside it. |
+| 4 | Per-subject setup | Standards source, district template, schedule type, instructional framework(s), and differentiation populations — collected in one message per subject, not nine separate questions. |
+| 5 | Past plans _(optional)_ | Drop a folder of old `.docx` plans. The plugin reads them to learn your voice, density, and activity preferences. Even 5–10 old plans make a significant difference. |
+| 6 | School calendar _(optional)_ | Upload an `.ics` or PDF calendar. Holidays and test days are skipped automatically from that point forward. |
 
-At the end, the plugin writes a `config.yaml` to your Documents folder and gives you a plain-English summary of everything it learned.
+At the end, the plugin writes a `config.yaml` file to `Documents/Lesson Plan Magic/` and gives you a plain-English summary of everything it learned.
+
+</details>
+
+<details>
+<summary><strong>Schedule types supported (click to expand)</strong></summary>
+
+| Schedule type | Description |
+|---|---|
+| `block` | 90-minute block periods, typically 4 per day |
+| `bell` | 5–7 shorter periods per day (45–55 min typical) |
+| `elementary` | Full-day self-contained with multiple content areas |
+| `ab-rotation` | Alternating A-day / B-day block schedule |
+| `custom` | Any other pattern — describe it in plain English |
 
 </details>
 
 ---
 
-## Using it
+## Usage
 
 ### Lesson plans
 
@@ -160,12 +236,14 @@ Plan next week for AP Chemistry.
 Make a daily plan for Friday in Algebra.
 I need a polished plan for Thursday — my principal is observing.
 Plan the next three weeks of American Literature, ending with a Socratic seminar.
-Plan my week.                          ← elementary: covers all content areas
+Plan my week.                          ← elementary: covers all content areas in one plan
 We had a fire drill. Re-plan Friday.
 What should I teach next week? We just finished the Civil War unit.
+Plan next week for all my preps.
+I want to start the photosynthesis unit Monday — plan the whole unit.
 ```
 
-The plugin may ask 2–3 clarifying questions in a single message, then runs each day in parallel — a full weekly plan doesn't take five times as long as a single day.
+The plugin may ask 2–3 clarifying questions in a single message, then runs each day in parallel — a full weekly plan does not take five times as long as a single day.
 
 ### Classroom artifacts
 
@@ -188,6 +266,9 @@ Add a new subject — I'm picking up Geometry next semester.
 I switched to a new district template. How do I upload it?
 Change my voice match level to strict — I have a big observation coming up.
 Add "Ms. Rodriguez" to my approved names list.
+Upload new standards for AP Chemistry.
+I have a new school calendar to upload.
+Resume my setup.
 ```
 
 ---
@@ -198,38 +279,259 @@ All files go to one folder:
 
 | Platform | Path |
 |---|---|
-| Mac / Linux | `Documents/Lesson Plan Magic/outputs/` |
-| Windows | `Documents\Lesson Plan Magic\outputs\` |
+| Mac / Linux | `~/Documents/Lesson Plan Magic/outputs/` |
+| Windows | `%USERPROFILE%\Documents\Lesson Plan Magic\outputs\` |
 
 Files are named by date and subject:
 
 ```
-2026-04-21_to_2026-04-25_chem.docx       ← weekly plan
-2026-04-25_chem.docx                      ← daily plan
+2026-04-21_to_2026-04-25_chem.docx          ← weekly lesson plan
+2026-04-25_chem.docx                          ← daily lesson plan
 unit_2026-04-21_to_2026-05-08_amer-lit.docx  ← unit plan
-2026-04-21_chem_agenda.pptx              ← agenda slide
-2026-04-21_chem_exit-ticket.docx         ← exit ticket
-2026-04-21_chem_exit-ticket.txt          ← Google Forms-ready exit ticket
-2026-04-22_chem_do-now.docx              ← do-now
-2026-04-24_chem_sub-plan.docx            ← sub plan
+2026-04-21_chem_agenda.pptx                  ← agenda slide
+2026-04-21_chem_exit-ticket.docx             ← exit ticket (printable)
+2026-04-21_chem_exit-ticket.txt              ← exit ticket (Google Forms format)
+2026-04-22_chem_do-now.docx                  ← do-now / bell ringer
+2026-04-24_chem_sub-plan.docx                ← sub plan
 ```
+
+Every lesson plan also writes a **`.plan.md` sidecar file** alongside the `.docx`. The classroom-artifacts skill reads this sidecar to pull learning intentions, activities, and standards without opening the Word document.
 
 Double-click any `.docx` to open in Word or Google Docs. Double-click any `.pptx` for PowerPoint or Google Slides.
 
 ---
 
-## Privacy
+## Configuration reference
 
-Four guarantees — hard-coded, not configurable:
+The plugin stores all your settings in one file:
+
+| Platform | Location |
+|---|---|
+| Mac / Linux | `~/Documents/Lesson Plan Magic/config.yaml` |
+| Windows | `%USERPROFILE%\Documents\Lesson Plan Magic\config.yaml` |
+
+You can edit this file directly, or say `Update my config` to let the plugin walk you through changes.
+
+<details>
+<summary><strong>Full config structure (click to expand)</strong></summary>
+
+```yaml
+version: "0.2.5"
+
+teacher:
+  name: "Ms. Hallman"
+  experience_level: veteran      # new | mid-career | veteran | veteran-new-to-subject
+  state: "GA"
+  school: "Statesboro High"
+  district: "Bulloch County Schools"
+
+subjects:
+  - id: chem
+    name: "Chemistry"
+    subject_type: departmentalized   # departmentalized | elementary-self-contained | co-taught
+
+    standards:
+      path: ~/Documents/Lesson Plan Magic/standards/ga-science-standards.pdf
+      # or: url: https://...
+      # or: inline: "CHEM.1 Matter and its interactions..."
+
+    template:
+      path: ~/Documents/Lesson Plan Magic/templates/bulloch-weekly-block.docx
+      mapping_verified: true
+
+    schedule:
+      type: block              # block | bell | elementary | ab-rotation | custom
+      period_length: 90        # minutes
+      days: [Mon, Tue, Wed, Thu, Fri]
+      periods_per_day: 1
+
+    frameworks:
+      - 5e
+      - gradual-release
+      # supported: 5e, gradual-release, workshop, siop, udl, direct-instruction,
+      #            pbl, hattie, marzano, swirl
+      # custom: set custom_framework_path instead
+
+    differentiation:
+      populations: [ELL, IEP_504, GIFTED, TIERED_READINESS]
+
+    voice_profile:
+      path: ~/Documents/Lesson Plan Magic/voice/chem_voice.json
+      # auto-generated from past_plans_dir during setup
+
+    pacing:
+      scope_and_sequence: ~/Documents/Lesson Plan Magic/scope/chem-scope.md
+      last_planned_week_end: "2026-04-18"
+      current_unit: "Stoichiometry"
+
+defaults:
+  output_format: docx          # docx | markdown | both
+  research_depth: verified     # off | generic | verified
+  compliance_mode: true
+  voice_match_level: calibrated  # generic | calibrated | strict
+
+privacy:
+  student_data: never          # hard-coded — not user-configurable
+  telemetry: off               # hard-coded — not user-configurable
+  pii_scan_before_write: true  # hard-coded — not user-configurable
+
+approved_names:
+  - "Ms. Rodriguez"            # names allowlisted past PII scanner
+  - "Mr. Chen"
+```
+
+</details>
+
+### Config fields explained
+
+| Field | What it controls |
+|---|---|
+| `experience_level` | How much pedagogy vocabulary appears in plans. `new` means more scaffolding, `veteran` means leaner prose. |
+| `subject_type` | `departmentalized` = single subject; `elementary-self-contained` = full day with content areas inside; `co-taught` = two teachers, split-instruction differentiation. |
+| `frameworks` | One or more framework IDs per subject. Activities in plans are labeled with that framework's phase names. |
+| `research_depth` | `off` = no external links; `generic` = links included without live verification; `verified` = every link checked live before inclusion. |
+| `voice_match_level` | `generic` = no voice matching; `calibrated` = uses voice profile loosely; `strict` = maximally faithful to past-plan voice. |
+| `compliance_mode` | Adds a compliance summary at the top of every plan (standards addressed, differentiation populations covered). |
+| `approved_names` | Teacher/co-teacher/staff names that the PII scanner should pass through rather than flag. Does not allow student names. |
+
+---
+
+## Standards integration
+
+The plugin builds a local index of your standards on first use and updates it when you upload a new standards document. It never fabricates standard codes.
+
+**What it can read:**
+- PDF files (state standards documents, curriculum guides)
+- URLs pointing to standards pages
+- Pasted plain text
+
+**How it works:**
+
+1. You upload your standards source during setup (or later with `Upload new standards for [subject]`).
+2. The plugin parses the document with `parse_standards.py` and builds a local JSON index.
+3. When generating a plan, it searches that index for codes that match the planned content — fuzzy matching handles minor wording differences.
+4. If no matching standard is found, the plan flags it in the compliance notes rather than inventing a code.
+
+**To update standards:**
+
+```
+Upload new standards for Chemistry.
+My state just released updated standards — can you re-index them?
+```
+
+---
+
+## Voice matching
+
+Voice matching lets the plugin write in your style — your sentence length, your warmth, your go-to activity verbs, your level of detail.
+
+**How it works:**
+
+1. During setup (or later with `Update my config`), you point the plugin at a folder of past `.docx` lesson plans.
+2. `ingest_past_plans.py` reads those plans and extracts style signals: sentence density, vocabulary richness, activity type frequencies, warmth markers, formality level.
+3. That profile is saved to a local `.json` file.
+4. When generating a new plan, the profile is loaded and used to calibrate the output.
+
+**Voice match levels:**
+
+| Level | Behavior |
+|---|---|
+| `generic` | No voice matching — standard professional tone |
+| `calibrated` | Voice profile used as a loose guide; may diverge for pedagogical clarity |
+| `strict` | Voice profile followed as closely as possible; best for observation prep |
+
+**If the output doesn't sound like you:**
+
+```
+The output doesn't sound like me — can you adjust the voice?
+Set my voice match level to strict.
+I want to upload more past plans to improve the voice matching.
+```
+
+The more past plans you provide, the better the match. Aim for at least 10–15 plans across different units for `strict` mode.
+
+---
+
+## Privacy & compliance
+
+Four guarantees — hard-coded, not user-configurable:
 
 | Guarantee | What it means |
 |---|---|
 | **Never writes student names** | Differentiation always uses population language: "students with extended-time accommodations" — never a student's name. FERPA-safe by design. |
-| **PII scan before every save** | Every file is scanned for names, SSNs, phone numbers, email addresses, student IDs, IEP phrasing, and medical notes before it's written to disk. If something is found, the file isn't saved and you'll see an explanation. |
-| **No plugin telemetry or hosted storage** | Generated files stay local and `privacy.telemetry: off` is hard-coded. If you use verified links or standards URLs, the plugin makes normal outbound web requests from your machine to fetch or verify that content. |
-| **Never fabricates citations** | Every link is verified as live and accurate before inclusion. Unverified resources are described in plain English — never written as a fake link. |
+| **PII scan before every save** | Every `.docx`, `.pptx`, and `.txt` file is scanned for names, SSNs, phone numbers, email addresses, student IDs, IEP phrasing, and medical notes before it's written to disk. If something is found, the file is not saved and you see a plain-English explanation. |
+| **No plugin telemetry or hosted storage** | Generated files stay local and `privacy.telemetry: off` is hard-coded. The plugin makes normal outbound web requests only when verifying resource links or fetching standards URLs — both initiated from your machine. |
+| **Never fabricates citations** | Every link is verified as live and accurate before inclusion. Unverified resources are described in plain English — never written as a broken or made-up hyperlink. |
 
 Lesson Plan Magic runs inside Cowork or Claude Code, so your planning conversation follows the normal privacy and security model of that host app.
+
+**FERPA note:** The plugin is designed for teacher use only. It should not receive individually identifiable student information. Differentiation notes reference accommodation populations (ELL, IEP/504, gifted), not individual students.
+
+---
+
+## Troubleshooting
+
+<details>
+<summary><strong>Python tools aren't installing</strong></summary>
+
+If `pip install` fails:
+- Try `pip3 install ...` instead of `pip`
+- On Windows, try `python -m pip install ...`
+- If you get a permissions error on Mac, try `pip3 install --user ...`
+- Make sure Python 3.9+ is installed: `python3 --version`
+
+</details>
+
+<details>
+<summary><strong>The plugin isn't recognized in Cowork</strong></summary>
+
+- Make sure you clicked **Accept** after dragging the `.plugin` file in.
+- Try closing and reopening Cowork.
+- Re-download the `.plugin` from [Releases](https://github.com/revjake1/lesson-plan-magic/releases) and re-install — a partial download can cause this.
+
+</details>
+
+<details>
+<summary><strong>The output doesn't use my district template</strong></summary>
+
+During setup, when the plugin asks for your template, drop the `.docx` file directly into the chat. If you already completed setup, say: `I have a new district template to upload.`
+
+If the template has locked or form-field placeholders, the plugin may fall back to a built-in template. Try `unlocking` the Word document before uploading (Word → Review → Restrict Editing → Stop Protection).
+
+</details>
+
+<details>
+<summary><strong>Standard codes are missing or wrong</strong></summary>
+
+- Make sure you uploaded your standards document during setup.
+- Say `Upload new standards for [subject]` to re-index.
+- If codes still look wrong, try uploading a PDF directly from your state education department's website.
+
+</details>
+
+<details>
+<summary><strong>The plan doesn't skip my school's holidays</strong></summary>
+
+You may not have uploaded your school calendar. Say `I have a school calendar to upload.` and drop an `.ics` or PDF file. Then say `Re-plan next week` to regenerate.
+
+</details>
+
+<details>
+<summary><strong>I got interrupted during setup</strong></summary>
+
+Say `Resume my setup` — progress is saved automatically after every step.
+
+</details>
+
+<details>
+<summary><strong>PII scan blocked my file</strong></summary>
+
+The plan contained something that matched the PII scanner's patterns. Review the explanation the plugin gives you. Common causes:
+- A co-teacher's name that isn't in your `approved_names` list — say `Add [name] to my approved names list`.
+- Fictional sample contacts in a sub plan — replace them after generating the document.
+- A standards code that looks like a phone number — contact the developer via [Issues](https://github.com/revjake1/lesson-plan-magic/issues).
+
+</details>
 
 ---
 
@@ -245,7 +547,12 @@ Yes — both Cowork and Claude Code run on Anthropic's Claude AI. Sign up free a
 <details>
 <summary>What if I don't have my district's lesson plan template?</summary>
 
-Choose one of three built-in starters during setup: **Weekly block** (90-min periods), **Weekly bell** (5–7 period schedule), or **Daily one-pager**. You can swap in your real template at any time by saying `I have a new district template to upload.`
+Choose one of three built-in starter templates during setup:
+- **Weekly block** — 90-minute block periods
+- **Weekly bell** — 5–7 period bell schedule
+- **Daily one-pager** — single-day, single-subject
+
+You can swap in your real district template at any time by saying `I have a new district template to upload.`
 
 </details>
 
@@ -259,14 +566,14 @@ The plugin still works — it skips the standard-code step and flags it in the c
 <details>
 <summary>Can elementary teachers use this?</summary>
 
-Yes. Self-contained classrooms are fully supported. Set up one "subject" (e.g., "3rd Grade") with content areas inside — math, reading, writing, science, social studies. The plugin generates one cohesive plan for your whole day.
+Yes. Self-contained classrooms are fully supported. Set up one "subject" (e.g., "3rd Grade") with content areas inside — math, reading, writing, science, social studies. The plugin generates one cohesive plan covering your whole day.
 
 </details>
 
 <details>
 <summary>Can I use this for co-taught classes?</summary>
 
-Yes. During setup, say the class is co-taught and give your co-teacher's name and role. Differentiation sections will include suggestions for splitting the instructional work between you.
+Yes. During setup, say the class is co-taught and give your co-teacher's name and role. Differentiation sections will include suggestions for splitting the instructional work between you. Add your co-teacher's name to `approved_names` so the PII scanner doesn't flag it.
 
 </details>
 
@@ -287,7 +594,7 @@ Just say `Resume my setup` — progress is saved automatically after every step.
 <details>
 <summary>I teach three sections of the same class. Does the plan cover all of them?</summary>
 
-Yes. During setup (or via `Update my config`), tell it you have multiple sections. The plugin accounts for them.
+Yes. During setup (or via `Update my config`), tell it you have multiple sections. The plugin accounts for scheduling differences between sections.
 
 </details>
 
@@ -298,11 +605,39 @@ Not in this version — LMS integration is on the roadmap. Upload output files m
 
 </details>
 
+<details>
+<summary>Does it support AP or IB courses?</summary>
+
+Yes — just reference your AP/IB standards during setup. The plugin supports any text-based standards document. For AP, College Board publishes course and exam descriptions as PDFs; upload one of those.
+
+</details>
+
+<details>
+<summary>Can I use my own instructional framework that isn't on the supported list?</summary>
+
+Yes. During setup, say "I use a custom framework" and upload your district's framework guide. The plugin learns the phase names from the document.
+
+</details>
+
+<details>
+<summary>Will it work with block schedule A/B rotation?</summary>
+
+Yes. Choose `ab-rotation` as your schedule type during setup. Plans respect the rotation and only plan activities for days that period meets.
+
+</details>
+
+<details>
+<summary>Where does the plugin store my files?</summary>
+
+All output files go to `Documents/Lesson Plan Magic/outputs/` on your machine. Your `config.yaml` and supporting files (standards index, voice profile, parsed calendar) live in `Documents/Lesson Plan Magic/`. Nothing is uploaded to external storage.
+
+</details>
+
 ---
 
 ## Full teacher guide
 
-For complete documentation including worked examples, framework details, and settings reference, see **[TEACHER_GUIDE.md](TEACHER_GUIDE.md)**.
+For complete documentation including worked examples, framework walkthroughs, configuration details, and troubleshooting for specific scenarios, see **[TEACHER_GUIDE.md](TEACHER_GUIDE.md)**.
 
 ---
 
