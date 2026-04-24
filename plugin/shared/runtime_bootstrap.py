@@ -18,7 +18,13 @@ from pathlib import Path
 import shutil
 import subprocess
 import sys
+import warnings
 from typing import Iterable
+
+warnings.filterwarnings(
+    "ignore",
+    message=r"urllib3 v2 only supports OpenSSL 1\.1\.1\+.*",
+)
 
 
 DISABLE_AUTO_INSTALL_ENV = "LESSON_PLAN_MAGIC_DISABLE_AUTO_INSTALL"

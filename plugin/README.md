@@ -16,7 +16,7 @@ Both skills share one config at `~/Documents/Lesson Plan Magic/config.yaml` and 
 1. Place the `.plugin` file into your Cowork plugins folder, or enable it via the plugin manager.
 2. Make sure Python 3.9+ is installed. The packaged plugin auto-installs its pinned Python helper packages on first use into `~/Documents/Lesson Plan Magic/.runtime/pyXY/site-packages/`.
 3. First invocation triggers a 10-20 minute onboarding interview. You can upload past lesson plans (folder drop), a standards PDF / URL, and a school calendar (`.ics` or PDF with selectable text) instead of answering every question manually.
-4. Generated files go to `~/Documents/Lesson Plan Magic/outputs/` on macOS and Linux, or `%USERPROFILE%\Documents\Lesson Plan Magic\outputs\` on Windows. Throughout this plugin, paths shown as `~/Documents/...` resolve via Python's `Path.home()` — you'll see them written in POSIX form in the docs even on Windows.
+4. Generated files go to `~/Documents/Lesson Plan Magic/outputs/` on macOS and Linux, or `%USERPROFILE%\Documents\Lesson Plan Magic\outputs\` on Windows. Throughout this plugin, paths shown as `~/Documents/...` resolve via Python's `Path.home()` — you'll see them written in POSIX form in the docs even on Windows. To relocate config, voice profiles, cached runtime, and outputs (for testing, a shared lab machine, or a non-default Documents folder), set the `LESSON_PLAN_MAGIC_HOME` environment variable to the directory you want everything under.
 
 ## Python dependencies
 

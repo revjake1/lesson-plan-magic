@@ -680,26 +680,35 @@ def _parse_batch_line(line: str) -> tuple[str, str | None] | None:
     return line, None
 
 
+_USAGE_LINES = (
+    "Usage: verify_research.py <url> [--claimed-title \"Title\"] "
+    "[--cache-dir PATH] [--verbose]",
+    "       verify_research.py --batch candidates.jsonl "
+    "[--cache-dir PATH] [--verbose]",
+    "",
+    "  Batch file: one JSON object per line with at minimum "
+    "'url' and optional 'claimed_title'. Raw URL lines are "
+    "accepted for backward compatibility (no title match).",
+    "  Example batch line:",
+    '    {"url": "https://www.nasa.gov/mission-pages/apollo/apollo-11.html", '
+    '"claimed_title": "Apollo 11 Mission"}',
+)
+
+
+def _print_usage(stream) -> None:
+    for line in _USAGE_LINES:
+        print(line, file=stream)
+
+
 def main() -> int:
     """CLI entry point. Stdout is slim by default (--verbose = full record)."""
     if len(sys.argv) < 2:
-        print(
-            "Usage: verify_research.py <url> [--claimed-title \"Title\"] "
-            "[--cache-dir PATH] [--verbose]",
-            file=sys.stderr,
-        )
-        print(
-            "       verify_research.py --batch candidates.jsonl "
-            "[--cache-dir PATH] [--verbose]",
-            file=sys.stderr,
-        )
-        print(
-            "  Batch file: one JSON object per line with at minimum "
-            "'url' and optional 'claimed_title'. Raw URL lines are "
-            "accepted for backward compatibility (no title match).",
-            file=sys.stderr,
-        )
+        _print_usage(sys.stderr)
         return 1
+
+    if sys.argv[1] in ("--help", "-h"):
+        _print_usage(sys.stdout)
+        return 0
 
     cache_dir = None
     if "--cache-dir" in sys.argv:

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.5
+
+- `verify_research.py` now honors `--help` / `-h` (previously they were dispatched to the HTTP fetcher as URLs, returning confusing JSON). Usage help also shows a minimal JSONL example for `--batch`.
+- Suppressed the macOS-system-Python `NotOpenSSLWarning` that urllib3 v2 prints on every script invocation, so first-time teacher output no longer looks broken.
+- Documented the `LESSON_PLAN_MAGIC_HOME` environment variable in `plugin/README.md` for teachers relocating their Lesson Plan Magic home.
+
 ## 0.3.4
 
 - No functional plugin changes; corrected a Windows-only stale-sidecar validation assumption so the 0.3.x release pipeline can publish cleanly across all supported OSes.
